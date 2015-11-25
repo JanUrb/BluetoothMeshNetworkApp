@@ -1,2 +1,2 @@
 # MobileCompAlarmanlage
-GitHub für MobileComp Ha
+Mit unserer Alarmanlage ist jeder Alarm anlage!
