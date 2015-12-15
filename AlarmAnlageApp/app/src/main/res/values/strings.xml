@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">AlarmAnlageApp</string>
+    <string name="communicationtype">communicationtype</string>
+    <string name="communicationaddinfo">communicationaddinfo</string>
+    <string name="settings">Einstellungen</string>
+    <string name="selectcommunicationtypetext">Hier können Sie einstellen, wie Sie Benachrichtigungen erhalten wollen.</string>
+    <string name="submitSettings">Einstellungen speichern</string>
+    <string name="sms">SMS</string>
+    <string name="hintsms">Telefonnummer</string>
+    <string name="email">E-Mail</string>
+    <string name="hintemail">E-Mail Adresse</string>
 </resources>
