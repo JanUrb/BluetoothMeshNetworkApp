@@ -1,20 +1,27 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.telephony.SmsManager;
+import android.util.Log;
 
 /**
  * Created by Donskelle-PC on 12.12.2015.
  */
-public class Sms implements CommunicationInterface{
+public class SmsSender implements CommunicationInterface{
+
+    private static final String TAG = "fhflAlarmSmsSender";
+
+
     private String phoneNumber;
 
 
-    public Sms(String number) {
+    public SmsSender(String number) {
+        Log.d(TAG, "SmsSender()");
         phoneNumber = number;
     }
 
     @Override
     public boolean sendMessage(String messageText) {
+        Log.d(TAG, "sendMessage");
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, messageText, null, null);
         return true;

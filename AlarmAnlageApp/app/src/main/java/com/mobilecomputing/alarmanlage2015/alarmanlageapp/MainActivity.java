@@ -4,15 +4,20 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 public class MainActivity extends Activity {
 
-    public static MainActivity instance = null;
+    private static final String TAG = "fhflAlarmMainActivity";
+
+
+    public static MainActivity instance = null; //?
     private CommunicationModel communicator;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -37,12 +42,14 @@ public class MainActivity extends Activity {
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
         instance = this;
     }
 
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause");
         super.onPause();
         instance = null;
     }

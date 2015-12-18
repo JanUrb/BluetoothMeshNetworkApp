@@ -3,19 +3,26 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 
 /**
  * Created by Donskelle-PC on 15.12.2015.
+ *
+ * TODO: In ein Fragment auslagern!
+ *
  */
 public class SettingsActivity extends Activity {
+
+    private static final String TAG = "fhflAlarmSettings";
 
     private EditText editText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
@@ -28,6 +35,7 @@ public class SettingsActivity extends Activity {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
+                Log.d(TAG, "RadioGroup onCheckedChangeListener");
                 switch (checkedId) {
                     case R.id.emailRadio:
                         group.removeView(editText);

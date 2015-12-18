@@ -1,5 +1,7 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
+import android.util.Log;
+
 import java.util.Observable;
 
 /**
@@ -10,8 +12,11 @@ import java.util.Observable;
  */
 public class BewegungsMelder extends Observable {
 
+    private static final String TAG = "fhflAlarmBewegungmelder";
+
     @Override
     public void notifyObservers(Object data) {
+        Log.d(TAG, "notifyObservers");
         super.notifyObservers(data);
     }
 }

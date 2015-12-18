@@ -1,13 +1,18 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
+import android.util.Log;
+
 /**
  * Created by Donskelle-PC on 15.12.2015.
  */
 public class CommunicationModel {
+
+    private static final String TAG = "fhflAlarmModel";
+
     private CommunicationInterface commuicator;
 
     public CommunicationModel() {
-
+        Log.d(TAG, "CommunicationsModel()");
     }
 
     /**
@@ -17,9 +22,10 @@ public class CommunicationModel {
      * @param addidionalInfo
      */
     public void setType(int type, String addidionalInfo) {
+        Log.d(TAG, "setType - Type: "+type);
         switch (type) {
             case 1:
-                commuicator = new Sms(addidionalInfo);
+                commuicator = new SmsSender(addidionalInfo);
                 break;
             case 2:
                 commuicator = new EmailSender(addidionalInfo);
@@ -33,6 +39,7 @@ public class CommunicationModel {
      * @param message
      */
     public boolean sendMessage(String message) {
+        Log.d(TAG, "sendMessage");
         try {
             commuicator.sendMessage(message);
             return true;
