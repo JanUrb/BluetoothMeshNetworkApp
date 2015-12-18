@@ -42,7 +42,7 @@ public class SettingsActivity extends Activity {
                         group.addView(editText, 3);
                         editText.setText("");
                         editText.setHint(R.string.hintsms);
-                        editText.setInputType(InputType.TYPE_NUMBER_VARIATION_NORMAL);
+                        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
                         editText.setError(editText.getHint() + " wird benötigt.");
                         break;
                 }
