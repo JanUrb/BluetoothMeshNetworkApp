@@ -14,10 +14,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import com.mobilecomputing.alarmanlage2015.alarmanlageapp.R;
 
-import com.example.androidstudio.ubtrfcommserver.R;
 
-// import com.example.androidstudio.hfragDebugLog.R;
 
 
 public class LogFragment extends Fragment {
