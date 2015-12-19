@@ -13,4 +13,5 @@
     <string name="send_message_to_device_button">Send Message To</string>
     <string name="bt_addr_hint">Bluetooth Adress</string>
     <string name="connected_devices_default">No connected devices</string>
+    <string name="received_message_default">No message received</string>
 </resources>

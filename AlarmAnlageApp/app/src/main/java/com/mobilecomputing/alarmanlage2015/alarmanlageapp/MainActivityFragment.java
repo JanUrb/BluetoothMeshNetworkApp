@@ -16,8 +16,13 @@ import fllog.Log;
 /**
  * Created by Jan Urbansky on 19.12.2015.
  */
-public class MainActivityFragment extends Fragment {
-    private static final String TAG ="fhflMainActFragment";
+public class MainActivityFragment extends Fragment implements Controller.OnControllerInteractionListener{
+    private static final String TAG = "fhflMainActFragment";
+
+
+    private Controller controller;
+
+
 
     /**
      * Sendet eine Nachricht zur im address_input angegebenen BT_ADDR
@@ -36,8 +41,14 @@ public class MainActivityFragment extends Fragment {
      * Stellt die eigenen BT_ADDR dar.
      */
     private TextView my_bt_addr;
+
+
     /**
-     *  Konstruktor
+     * Stellt eine empfangene Nachricht dar.
+     */
+    private TextView received_message;
+    /**
+     * Konstruktor
      */
     public MainActivityFragment() {
         Log.d(TAG, "MainActivityFragment()");
@@ -52,10 +63,29 @@ public class MainActivityFragment extends Fragment {
         address_input = (EditText) view.findViewById(R.id.send_to_input);
         device_list = (TextView) view.findViewById(R.id.connected_devices_list);
         my_bt_addr = (TextView) view.findViewById(R.id.my_bt_addr);
+        received_message = (TextView) view.findViewById(R.id.message_received_field);
 
-
-        /*Benötigte Elemente: Liste der verbundenen Geräte, Eingabefeld zum Senden an eine Adresse, ein senden Knopf*/
 
         return view;
+    }
+
+
+    public void setController(Controller controller) {
+        this.controller = controller;
+    }
+
+    @Override
+    public void onControllerReceived(String str) {
+
+    }
+
+    @Override
+    public void onControllerConnectInfo(String strState) {
+
+    }
+
+    @Override
+    public void onControllerServerInfo(Boolean serverInfo) {
+
     }
 }

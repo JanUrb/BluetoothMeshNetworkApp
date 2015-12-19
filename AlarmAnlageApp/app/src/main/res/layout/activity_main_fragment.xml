@@ -10,6 +10,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:textColor="@android:color/holo_red_dark"
+        android:gravity="center_vertical"
         android:text="@string/default_bt_addr"/>
 
 
@@ -39,7 +40,14 @@
 
 
     </LinearLayout>
-
+    <TextView
+        android:id="@+id/message_received_field"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:text="@string/received_message_default"
+        android:gravity="center_vertical"
+        android:background="@android:color/holo_orange_light"/>
 
     <TextView
         android:id="@+id/connected_devices_list"
@@ -47,7 +55,8 @@
         android:layout_height="0dp"
         android:layout_weight="6"
         android:text="@string/connected_devices_default"
-        android:background="@android:color/darker_gray">
+        android:background="@android:color/darker_gray"
+        android:gravity="center_horizontal">
 
     </TextView>
 </LinearLayout>

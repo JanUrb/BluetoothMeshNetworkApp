@@ -1,6 +1,7 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.os.Bundle;
 
 import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
@@ -11,6 +12,7 @@ public class MainActivity extends Activity {
 
     private static final String TAG = "fhflAlarmMainActivity";
 
+    private Controller controller;
 
     public static MainActivity instance = null; //?
     private CommunicationModel communicator;
@@ -31,6 +33,10 @@ public class MainActivity extends Activity {
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFrag).
                 replace(R.id.log_fragment_container, Log.getFragment()).commit();
+
+        controller = new Controller();
+        controller.init(this, mainFrag);
+        mainFrag.setController(controller);
 
 
 //        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
