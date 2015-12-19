@@ -25,6 +25,9 @@ public class MainActivityFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.activity_main_fragment, container, false);
 
-        return super.onCreateView(inflater, container, savedInstanceState);
+
+        /*Benötigte Elemente: Liste der verbundenen Geräte, Eingabefeld zum Senden an eine Adresse, ein senden Knopf*/
+
+        return view;
     }
 }

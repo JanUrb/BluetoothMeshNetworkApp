@@ -4,4 +4,50 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <TextView
+        android:id="@+id/my_bt_addr"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:textColor="@android:color/holo_red_dark"
+        android:text="@string/default_bt_addr"/>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2">
+
+
+        <EditText
+            android:id="@+id/send_to_input"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:hint="@string/bt_addr_hint"
+            />
+
+
+        <Button
+            android:id="@+id/send_message_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="@string/send_message_to_device_button"
+            />
+
+
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/connected_devices_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:text="@string/connected_devices_default"
+        android:background="@android:color/darker_gray">
+
+    </TextView>
 </LinearLayout>

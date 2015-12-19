@@ -1,4 +1,4 @@
-package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
+package com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -7,6 +7,8 @@ import fllog.Log;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioGroup;
+
+import com.mobilecomputing.alarmanlage2015.alarmanlageapp.R;
 
 /**
  * Created by Donskelle-PC on 15.12.2015.

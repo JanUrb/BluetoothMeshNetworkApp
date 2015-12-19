@@ -7,6 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+/**
+ * Created by Jan Urbansky on 19.12.2015.
+ *
+ *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
+ *
+ */
 public class ConnectedThread extends Thread {
 
     private Controller mController;

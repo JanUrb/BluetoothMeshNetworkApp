@@ -1,9 +1,9 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
+
+import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
 
 import fllog.Log;
 

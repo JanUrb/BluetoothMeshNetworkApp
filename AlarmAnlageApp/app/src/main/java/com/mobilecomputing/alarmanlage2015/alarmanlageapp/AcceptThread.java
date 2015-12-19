@@ -7,7 +7,12 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.util.UUID;
 
-
+/**
+ * Created by Jan Urbansky on 19.12.2015.
+ *
+ *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
+ *
+ */
 public class AcceptThread extends Thread {
 
     private BluetoothAdapter mBluetoothAdapter;

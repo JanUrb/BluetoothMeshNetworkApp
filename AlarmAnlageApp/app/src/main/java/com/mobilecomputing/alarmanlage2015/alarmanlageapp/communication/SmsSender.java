@@ -1,4 +1,4 @@
-package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
+package com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication;
 
 import android.telephony.SmsManager;
 import fllog.Log;

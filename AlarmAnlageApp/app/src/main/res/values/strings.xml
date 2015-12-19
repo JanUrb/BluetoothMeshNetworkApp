@@ -9,4 +9,8 @@
     <string name="hintsms">Telefonnummer</string>
     <string name="email">E-Mail</string>
     <string name="hintemail">E-Mail Adresse</string>
+    <string name="default_bt_addr">my default bt_addr</string>
+    <string name="send_message_to_device_button">Send Message To</string>
+    <string name="bt_addr_hint">Bluetooth Adress</string>
+    <string name="connected_devices_default">No connected devices</string>
 </resources>

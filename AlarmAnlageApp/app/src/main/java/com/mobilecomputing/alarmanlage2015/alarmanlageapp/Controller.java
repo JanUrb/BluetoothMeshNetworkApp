@@ -11,8 +11,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import fllog.Log;
+
 /**
  * Created by Jan Urbansky on 19.12.2015.
+ *
+ *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
+ *
  */
 public class Controller extends StateMachine{
 
@@ -29,6 +33,7 @@ public class Controller extends StateMachine{
     private static final String mServiceName = "SerialPort";    //"KT-Service";
 
     protected static final int REQUEST_ENABLE_BT = 1;
+
 
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
@@ -220,4 +225,3 @@ public class Controller extends StateMachine{
 
 }
 
-}
