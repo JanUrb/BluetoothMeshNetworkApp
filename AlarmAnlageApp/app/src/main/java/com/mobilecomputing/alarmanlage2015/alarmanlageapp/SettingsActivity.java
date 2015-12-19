@@ -3,7 +3,7 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
+import fllog.Log;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RadioGroup;

@@ -1,7 +1,7 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.content.Intent;
-import android.util.Log;
+import fllog.Log;
 
 /**
  * Created by Donskelle-PC on 15.12.2015.

@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
+import fllog.Log;
 
 public class MainActivity extends Activity {
 
@@ -21,23 +21,29 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
-        int communicationType = sharedPref.getInt(getString(R.string.communicationtype), 0);
-        String addInfo = sharedPref.getString(getString(R.string.communicationaddinfo), null);
+        //init den Logger showTimestamp, showTag
+        Log.init(true, true);
 
 
-        if(communicationType == 0) {
-            // Start Settings
-            Intent intentSettings = new Intent(this, SettingsActivity.class);
-            this.startActivity(intentSettings);
-        }
-        else {
-            // Init App
-            communicator = new CommunicationModel();
-            communicator.setType(communicationType, addInfo);
-            communicator.sendMessage("Hallo was geht");
-        }
+
+
+
+//        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
+//        int communicationType = sharedPref.getInt(getString(R.string.communicationtype), 0);
+//        String addInfo = sharedPref.getString(getString(R.string.communicationaddinfo), null);
+//
+//
+//        if(communicationType == 0) {
+//            // Start Settings
+//            Intent intentSettings = new Intent(this, SettingsActivity.class);
+//            this.startActivity(intentSettings);
+//        }
+//        else {
+//            // Init App
+//            communicator = new CommunicationModel();
+//            communicator.setType(communicationType, addInfo);
+//            communicator.sendMessage("Hallo was geht");
+//        }
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
-import android.util.Log;
+import fllog.Log;
 
 import java.util.Observable;
 

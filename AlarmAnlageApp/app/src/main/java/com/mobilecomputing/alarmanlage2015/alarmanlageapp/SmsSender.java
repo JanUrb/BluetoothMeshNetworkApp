@@ -1,7 +1,7 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.telephony.SmsManager;
-import android.util.Log;
+import fllog.Log;
 
 /**
  * Created by Donskelle-PC on 12.12.2015.
