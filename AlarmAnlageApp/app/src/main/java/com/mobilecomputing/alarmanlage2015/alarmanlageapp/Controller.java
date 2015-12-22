@@ -35,6 +35,8 @@ public class Controller extends StateMachine{
     protected static final int REQUEST_ENABLE_BT = 1;
 
 
+
+    //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
         CO_INIT,                                        // to Controller
@@ -140,7 +142,7 @@ public class Controller extends StateMachine{
 
                         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                         Log.d(TAG, "paired devices:");
-                        if (pairedDevices.size() > 0) {
+                        if (pairedDevices.size() > 0) { //? Ist diese Anweisung nicht unnötig? Würde BluetoothDevice device : pairedDevices nicht reichen?
                             // Loop through paired devices
                             for (BluetoothDevice device : pairedDevices) {
                                 Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
@@ -148,6 +150,7 @@ public class Controller extends StateMachine{
                         }
                         Log.d(TAG, "instanziere AcceptThread");
 
+                        //AcceptThread startet
                         mAcceptThread = new AcceptThread(mBluetoothAdapter, this, MY_UUID, mServiceName);
                         mAcceptThread.start();
 
@@ -173,6 +176,11 @@ public class Controller extends StateMachine{
                         break;
 
                     case AT_MANAGE_CONNECTED_SOCKET:
+
+                        //Accept thread wird abbgebroche und ein neuer ConnectThread startet
+                        //An dieser Stelle muss ein neuer AcceptThread gestartet werden. Es kann nicht
+                        //mehr als 7 Geräte gleichzeitig gestartet werden (Bluetooth Standard)
+                        //TODO Neuer State
                         mAcceptThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
                         mConnectedThread.start();
@@ -195,11 +203,15 @@ public class Controller extends StateMachine{
                         mConnectedThread.write(((String) message.obj).getBytes());
                         break;
 
+                    //bei uns gibt es mehrere CT. Hier muss gefiltert werden, ob die Nachricht an mich
+                    //gesendet werden soll.
+                    //TODO
                     case CT_RECEIVED:
                         String str = new String((byte[]) message.obj, 0, message.arg1);
                         mUiListener.onControllerReceived( str );
                         break;
 
+                    //Das verbundene Gerät aus dem Geräte speicher löschen.
                     case CT_CONNECTION_CLOSED:
                     case UI_STOP_SERVER:
                         mConnectedThread.cancel();
