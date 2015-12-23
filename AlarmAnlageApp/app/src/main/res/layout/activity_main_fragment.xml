@@ -18,7 +18,11 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2">
+        android:layout_weight="2"
+        android:descendantFocusability="beforeDescendants"
+        android:focusableInTouchMode="true">
+        <!-- Die beiden letzten Eigenschaften verhindern, dass beim Starten der App der autofocus auf das
+        Eingabefeld der BT_ADDR gelegt wird und das virtuelle Keyboard aufgeklappt wird. Dieses zerstört das Layout!-->
 
 
         <EditText
