@@ -33,21 +33,25 @@ public class Controller extends StateMachine{
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final String mServiceName = "SerialPort";    //"KT-Service";
 
-    protected static final int REQUEST_ENABLE_BT = 1;
+    //wird in der Activity abgefangen
+    public static final int REQUEST_ENABLE_BT = 1;
+    //Enable discoverability
+    public static final int REQUEST_ENABLE_DISCO = 2;
 
 
 
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
-        INIT_BT,
+        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, READ_PAIRED_DEVICES,
+        START_ACCEPT_THREAD,// Bluetooth Initiation
         CO_INIT,                                        // to Controller
         AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,           // from AcceptThread
         CT_RECEIVED, CT_CONNECTION_CLOSED, CT_DEBUG     // from ConnectedThread
     }
 
     private enum State {
-        START, IDLE, WAIT_FOR_CONNECT, CONNECTED
+        START, INIT_BT, WAIT_FOR_CONNECT, CONNECTED
     }
 
     private State state = State.START;        // the state variable
@@ -113,10 +117,10 @@ public class Controller extends StateMachine{
                     case CO_INIT:
                         Log.v(TAG, "in Init");
 
-                        mUiListener.onControllerConnectInfo("IDLE"); //kann raus
+                        mUiListener.onControllerConnectInfo("INIT_BT"); //kann raus
 
-                        state = State.IDLE;
-                        sendSmMessage(SmMessage.INIT_BT.ordinal(), 0, 0, null);
+                        state = State.INIT_BT;
+                        sendSmMessage(SmMessage.ENABLE_BT.ordinal(), 0, 0, null);
 
                         break;
                     default:
@@ -124,9 +128,9 @@ public class Controller extends StateMachine{
                         break;
                 }
                 break;
-            case IDLE:
+            case INIT_BT:
                 switch (inputSmMessage) {
-                    case INIT_BT:
+                    case ENABLE_BT:
 
                         Log.d(TAG, "Init Bluetooth");
                         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -134,24 +138,40 @@ public class Controller extends StateMachine{
                             Log.d(TAG, "Error: Device does not support Bluetooth !!!");
                             mUiListener.onControllerServerInfo(false);
 
-                            state = State.IDLE; //fallback in idle state
+                            state = State.INIT_BT; //fallback in init_bt state
                             break;
                         }
+
+                        //die eigene Bluetoothadresse auslesen
+                        bt_model.setMyBT_ADDR(mBluetoothAdapter.getAddress());
+
 
                         if ( !mBluetoothAdapter.isEnabled() ) {
                             Log.d(TAG, "Try to enable Bluetooth.");
                             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             mActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                            //warte auf den Intent
+                            sendSmMessage(SmMessage.WAIT_FOR_INTENT.ordinal(), 0, 0, null);
+
+                        }else{
+                            sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0, null);
                         }
-                        // ##todo:  evaluate returnvalue s. Foliensatz
+                        break;
 
 
-                        bt_model.setMyBT_ADDR(mBluetoothAdapter.getAddress());
+                    case ENABLE_DISCOVERABILITY:
+                        //das Gerät sichtbar schalten
+                        Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0); //0 bedeutet, dass das Gerät immer sichtbar ist.
+                        mActivity.startActivityForResult(discoverableIntent, REQUEST_ENABLE_DISCO);
+                        sendSmMessage(SmMessage.WAIT_FOR_INTENT.ordinal(), 0, 0, null);
 
+                        break;
+
+
+
+                    case READ_PAIRED_DEVICES:
                         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
-
-
                         Log.d(TAG, "paired devices:");
                         if (pairedDevices.size() > 0) {
                             bt_model.setPairedDevices(pairedDevices);
@@ -159,9 +179,19 @@ public class Controller extends StateMachine{
                                 Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
                             }
                         }
-                        Log.d(TAG, "instanziere AcceptThread");
 
-                        //AcceptThread startet
+                        sendSmMessage(SmMessage.START_ACCEPT_THREAD.ordinal(), 0, 0, null);
+                        break;
+
+                    //Dieser State wird benutzt, um die App so lange anzuhalten, bis ein Intent erfolgreich
+                    //zurück geschrieben hat.
+                    case WAIT_FOR_INTENT:
+                        break;
+
+                    //TODO: In Wait_FOR_CONNECT auslagern?
+                    //AcceptThread startet
+                    case START_ACCEPT_THREAD:
+                        Log.d(TAG, "instanziere AcceptThread");
                         mAcceptThread = new AcceptThread(mBluetoothAdapter, this, MY_UUID, mServiceName);
                         mAcceptThread.start();
 
@@ -169,22 +199,25 @@ public class Controller extends StateMachine{
                         mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
                         state = State.WAIT_FOR_CONNECT;
                         break;
+
+
                     default:
-                        Log.v(TAG, "SM: not a valid input in this state !!!!!!");
+                        Log.v(TAG, "SM INIT_BT: not a valid input in this state !!!!!!");
                         break;
                 }
+                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
                 break;
 
             case WAIT_FOR_CONNECT:
                 switch (inputSmMessage) {
 
-                    case UI_STOP_SERVER:
-                        mAcceptThread.cancel();
-
-                        mUiListener.onControllerServerInfo(false);
-                        mUiListener.onControllerConnectInfo("IDLE");
-                        state = State.IDLE;
-                        break;
+//                    case UI_STOP_SERVER:
+//                        mAcceptThread.cancel();
+//
+//                        mUiListener.onControllerServerInfo(false);
+//                        mUiListener.onControllerConnectInfo("INIT_BT");
+//                        state = State.INIT_BT;
+//                        break;
 
                     case AT_MANAGE_CONNECTED_SOCKET:
 
@@ -202,9 +235,10 @@ public class Controller extends StateMachine{
                         break;
 
                     default:
-                        Log.v(TAG, "SM: not a valid input in this state !!!!!!");
+                        Log.v(TAG, "SM WAIT_FOR_CONNECT: not a valid input in this state !!!!!!");
                         break;
                 }
+                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
                 break;
 
             case CONNECTED:
@@ -230,21 +264,29 @@ public class Controller extends StateMachine{
                         mConnectedThread.cancel();
 
                         mUiListener.onControllerServerInfo(false);
-                        mUiListener.onControllerConnectInfo("IDLE");
-                        state = State.IDLE;
+                        mUiListener.onControllerConnectInfo("INIT_BT");
+                        state = State.INIT_BT;
                         break;
 
                     default:
                         Log.v(TAG, "SM: not a valid input in this state !!!!!!");
                         break;
                 }
+                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
         }
          Log.i(TAG, "SM: new State: " + state);
      }
 
 
+    public void bluetoothAdapterEnabled(){
+        Log.d(TAG, "bluetoothAdapterEnabled");
+        sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0,null);
+    }
 
-
+    public void discoverabilityEnabled(){
+        Log.d(TAG, "discoverabilityEnabled()");
+        sendSmMessage(SmMessage.READ_PAIRED_DEVICES.ordinal(), 0, 0, null);
+    }
 
     public interface OnControllerInteractionListener {
         public void onControllerReceived(String str);

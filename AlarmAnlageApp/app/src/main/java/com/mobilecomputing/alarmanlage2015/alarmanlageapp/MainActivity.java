@@ -1,13 +1,15 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
+
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
 
 import fllog.Log;
+
+import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
 
 public class MainActivity extends Activity {
 
@@ -66,6 +68,29 @@ public class MainActivity extends Activity {
 //        }
     }
 
+
+    /**
+     * Dieser Handler fängt die im Controller gestarteten Intents ab und gibt diese entsprechend weiter.
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult()");
+        switch (requestCode){
+            case Controller.REQUEST_ENABLE_BT:
+                controller.bluetoothAdapterEnabled(); //es folgt discoverarbility
+                break;
+
+            case Controller.REQUEST_ENABLE_DISCO:
+                controller.discoverabilityEnabled(); //es folgt read devices
+                break;
+
+            default:
+                Log.v(TAG, "Unbekannter requestCode: "+requestCode);
+        }
+    }
 
     @Override
     public void onResume() {
