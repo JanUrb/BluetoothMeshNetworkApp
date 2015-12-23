@@ -1,6 +1,7 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Fragment;
+import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +12,18 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.util.Observable;
+import java.util.Observer;
+
 import fllog.Log;
 
 /**
  * Created by Jan Urbansky on 19.12.2015.
  */
-public class MainActivityFragment extends Fragment implements Controller.OnControllerInteractionListener{
+public class MainActivityFragment extends Fragment implements Controller.OnControllerInteractionListener, Observer{
     private static final String TAG = "fhflMainActFragment";
 
-
+    private BluetoothModel bt_model;
     private Controller controller;
 
 
@@ -74,18 +78,42 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         this.controller = controller;
     }
 
+    public void setBt_model(BluetoothModel bt_model){
+        this.bt_model = bt_model;
+        this.bt_model.addObserver(this);
+    }
+
     @Override
     public void onControllerReceived(String str) {
-
+        Log.d(TAG, "onControllerReceived");
     }
 
     @Override
     public void onControllerConnectInfo(String strState) {
-
+        Log.d(TAG, "onControllerConnectInfo");
     }
 
     @Override
     public void onControllerServerInfo(Boolean serverInfo) {
+        Log.d(TAG, "onControllerServerInfo");
+    }
 
+    @Override
+    public void update(Observable observable, Object data) {
+        Log.d(TAG, "update");
+        //ignoriere null oder  leere Werte
+        if(bt_model.getPairedDevices() != null){
+            StringBuilder str = new StringBuilder();
+            for(BluetoothDevice device:bt_model.getPairedDevices()){
+                str.append(device.getAddress()+"\n");
+            }
+            device_list.setText(str.toString());
+        }
+        if(!bt_model.getMyBT_ADDR().isEmpty()){
+            my_bt_addr.setText(bt_model.getMyBT_ADDR());
+        }
+        if(!bt_model.getMessageReceivedFrom().isEmpty()){
+            received_message.setText(bt_model.getMessageReceivedFrom());
+        }
     }
 }

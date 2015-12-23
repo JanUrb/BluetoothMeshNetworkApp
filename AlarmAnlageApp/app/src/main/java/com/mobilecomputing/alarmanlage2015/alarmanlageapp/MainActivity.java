@@ -2,6 +2,7 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
@@ -13,7 +14,7 @@ public class MainActivity extends Activity {
     private static final String TAG = "fhflAlarmMainActivity";
 
     private Controller controller;
-
+    private BluetoothModel bt_model;
     public static MainActivity instance = null; //?
     private CommunicationModel communicator;
 
@@ -25,18 +26,26 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //init den Logger showTimestamp, showTag
 
-
+        bt_model = new BluetoothModel();
 
         MainActivityFragment mainFrag = new MainActivityFragment();
+        mainFrag.setBt_model(bt_model);
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFrag).
                 replace(R.id.log_fragment_container, Log.getFragment()).commit();
 
         controller = new Controller();
-        controller.init(this, mainFrag);
+
+        //Die Bluetoothverbindung wird mit dem Starten der App aufgebaut. Es wird also keine
+        //Benachrichtigung durch die UI benötigt.
         mainFrag.setController(controller);
+
+
+
+
+        controller.init(this, mainFrag, bt_model);
+
 
 
 //        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
@@ -56,6 +65,7 @@ public class MainActivity extends Activity {
 //            communicator.sendMessage("Hallo was geht");
 //        }
     }
+
 
     @Override
     public void onResume() {

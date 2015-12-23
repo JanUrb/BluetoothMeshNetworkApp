@@ -23,6 +23,7 @@ public class Controller extends StateMachine{
     private static final String TAG = "fhflController";
     private OnControllerInteractionListener mUiListener = null;
     private Activity mActivity = null;
+    private BluetoothModel bt_model;
 
     private AcceptThread mAcceptThread;
     private ConnectedThread mConnectedThread;
@@ -39,6 +40,7 @@ public class Controller extends StateMachine{
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
+        INIT_BT,
         CO_INIT,                                        // to Controller
         AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,           // from AcceptThread
         CT_RECEIVED, CT_CONNECTION_CLOSED, CT_DEBUG     // from ConnectedThread
@@ -56,10 +58,11 @@ public class Controller extends StateMachine{
         Log.d(TAG, "Controller()");
     }
 
-    public void init(Activity a, Fragment frag) {
+    public void init(Activity a, Fragment frag, BluetoothModel bt_model) {
         Log.d(TAG, "init()");
 
         mActivity = a;
+        this.bt_model = bt_model;
 
         // init InterfaceListener
         try {
@@ -110,9 +113,11 @@ public class Controller extends StateMachine{
                     case CO_INIT:
                         Log.v(TAG, "in Init");
 
-                        mUiListener.onControllerConnectInfo("IDLE");
+                        mUiListener.onControllerConnectInfo("IDLE"); //kann raus
 
                         state = State.IDLE;
+                        sendSmMessage(SmMessage.INIT_BT.ordinal(), 0, 0, null);
+
                         break;
                     default:
                         Log.v(TAG, "SM: not a valid input in this state !!!!!!");
@@ -121,7 +126,7 @@ public class Controller extends StateMachine{
                 break;
             case IDLE:
                 switch (inputSmMessage) {
-                    case UI_START_SERVER:
+                    case INIT_BT:
 
                         Log.d(TAG, "Init Bluetooth");
                         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -129,7 +134,7 @@ public class Controller extends StateMachine{
                             Log.d(TAG, "Error: Device does not support Bluetooth !!!");
                             mUiListener.onControllerServerInfo(false);
 
-                            state = State.IDLE;
+                            state = State.IDLE; //fallback in idle state
                             break;
                         }
 
@@ -140,10 +145,16 @@ public class Controller extends StateMachine{
                         }
                         // ##todo:  evaluate returnvalue s. Foliensatz
 
+
+                        bt_model.setMyBT_ADDR(mBluetoothAdapter.getAddress());
+
                         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+
+
                         Log.d(TAG, "paired devices:");
-                        if (pairedDevices.size() > 0) { //? Ist diese Anweisung nicht unnötig? Würde BluetoothDevice device : pairedDevices nicht reichen?
-                            // Loop through paired devices
+                        if (pairedDevices.size() > 0) {
+                            bt_model.setPairedDevices(pairedDevices);
                             for (BluetoothDevice device : pairedDevices) {
                                 Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
                             }
@@ -208,10 +219,12 @@ public class Controller extends StateMachine{
                     //TODO
                     case CT_RECEIVED:
                         String str = new String((byte[]) message.obj, 0, message.arg1);
-                        mUiListener.onControllerReceived( str );
+                        bt_model.setMessageReceivedFrom(str);
+
+                        //mUiListener.onControllerReceived( str );
                         break;
 
-                    //Das verbundene Gerät aus dem Geräte speicher löschen.
+                    //Das verbundene Gerät aus dem Geräte speicher löschen. ? Einfach mit boundDevices(?) im
                     case CT_CONNECTION_CLOSED:
                     case UI_STOP_SERVER:
                         mConnectedThread.cancel();
@@ -228,6 +241,10 @@ public class Controller extends StateMachine{
         }
          Log.i(TAG, "SM: new State: " + state);
      }
+
+
+
+
 
     public interface OnControllerInteractionListener {
         public void onControllerReceived(String str);
