@@ -59,7 +59,7 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
 
         View view = inflater.inflate(R.layout.activity_main_fragment, container, false);
@@ -68,6 +68,16 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         device_list = (TextView) view.findViewById(R.id.connected_devices_list);
         my_bt_addr = (TextView) view.findViewById(R.id.my_bt_addr);
         received_message = (TextView) view.findViewById(R.id.message_received_field);
+
+
+    //an eine bt_addr senden
+//        address_input.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                controller.sendSmMessage(Controller.SmMessage.UI_SEND, );
+//            }
+//        });
 
 
         return view;

@@ -15,9 +15,14 @@ public class BluetoothModel extends Observable {
 
     private final static String TAG = "fhflBluetoothModel";
 
-
+    //pairedDevices sind nicht die eientlich verbunden geräte. es können auch geräte sein, die früher schon mal
+    //verbunden waren.
     private Set<BluetoothDevice> pairedDevices = null;
     private String myBT_ADDR = "";
+    /**
+     * Die verbunden Geräte.
+     */
+    private Set<BluetoothDevice> connectedDevices = null;
 
 
 
@@ -61,6 +66,13 @@ public class BluetoothModel extends Observable {
         return messageReceivedFrom;
     }
 
+    public Set<BluetoothDevice> getConnectedDevices() {
+        return connectedDevices;
+    }
+
+    public void setConnectedDevices(Set<BluetoothDevice> connectedDevices) {
+        this.connectedDevices = connectedDevices;
+    }
 
     /**
      * Sonst müsste man in jedem Setter setChanged und notifyObservers
