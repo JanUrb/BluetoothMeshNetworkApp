@@ -2,6 +2,8 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.os.Handler;
 
+import fllog.Log;
+
 /**
  *  Statemachine Klasse
  *
@@ -31,6 +33,7 @@ public class StateMachine extends Handler {
     }
 
     protected void setTimer(int messageType, long durationMs){
+        Log.d(TAG, "setTimer");
         android.os.Message msg = new android.os.Message();
         msg.what = messageType;
         msg.arg1 = 0;
@@ -39,10 +42,12 @@ public class StateMachine extends Handler {
     }
 
     protected void stopTimer(int messageType){
+        Log.d(TAG, "stopTimer");
         removeMessages(messageType);                                                        //##4b
     }
 
     public void sendSmMessage(int messageType, int arg1, int arg2, Object obj){
+        Log.d(TAG, "sendSmMessage");
         // PrintData d = new PrintData(3);                                                   //##3a
         android.os.Message msg = new android.os.Message();                                   //##0a
         msg.what = messageType;

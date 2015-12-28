@@ -70,14 +70,14 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         received_message = (TextView) view.findViewById(R.id.message_received_field);
 
 
-    //an eine bt_addr senden
-//        address_input.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//
-//                controller.sendSmMessage(Controller.SmMessage.UI_SEND, );
-//            }
-//        });
+//    an eine bt_addr senden
+        address_input.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String address = address_input.getText().toString();
+                controller.sendSmMessage(Controller.SmMessage.UI_SEND.ordinal(), 0, 0, address);
+            }
+        });
 
 
         return view;

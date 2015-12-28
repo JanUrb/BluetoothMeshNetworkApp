@@ -43,7 +43,7 @@ public class Controller extends StateMachine{
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
-        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, READ_PAIRED_DEVICES,
+        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, CONNECT_TO_DEVICE, READ_PAIRED_DEVICES,
         START_ACCEPT_THREAD,// Bluetooth Initiation
         CO_INIT,                                        // to Controller
         AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,           // from AcceptThread
@@ -89,7 +89,20 @@ public class Controller extends StateMachine{
      */
     @Override
     void theBrain(android.os.Message message){
+
+        /**
+         * inputSmMessage ist nicht die Message selber. Nur der enum Wert.
+         */
         SmMessage inputSmMessage = messageIndex[message.what];
+
+        //Bis jetzt wird nur beim Senden das Message Objekt genutzt.
+        String deviceId;
+        try{
+            deviceId = (String) message.obj;
+        }catch (Exception e){
+            Log.d(TAG, e.getStackTrace().toString());
+        }
+
 
         // erstmal ohne SM-Logging die Debug-Meldungen der Threads verarbeiten
         if ( inputSmMessage == SmMessage.AT_DEBUG ) {
@@ -169,7 +182,7 @@ public class Controller extends StateMachine{
                         break;
 
 
-
+                    //unnötig für die funktion der app... TODO
                     case READ_PAIRED_DEVICES:
                         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                         Log.d(TAG, "paired devices:");

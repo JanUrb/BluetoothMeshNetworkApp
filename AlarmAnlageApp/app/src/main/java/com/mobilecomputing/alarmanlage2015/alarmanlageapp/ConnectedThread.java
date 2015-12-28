@@ -20,6 +20,11 @@ public class ConnectedThread extends Thread {
     private final InputStream mInStream;
     private final OutputStream mOutStream;
 
+    /**
+     *
+     * @param socket
+     * @param controller
+     */
     public ConnectedThread(BluetoothSocket socket, Controller controller) {
         mSocket = socket;
         mController = controller;
