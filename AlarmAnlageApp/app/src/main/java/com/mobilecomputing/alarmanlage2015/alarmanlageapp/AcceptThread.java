@@ -7,10 +7,13 @@ import android.bluetooth.BluetoothSocket;
 import java.io.IOException;
 import java.util.UUID;
 
+import fllog.Log;
+
 /**
  * Created by Jan Urbansky on 19.12.2015.
  *
  *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
+ *  Ist die Serverseite der Verbindung.
  *
  */
 public class AcceptThread extends Thread {
@@ -20,8 +23,17 @@ public class AcceptThread extends Thread {
     private Controller mController;
     private UUID mUUID;
     private String mServiceName;
+    private static final String TAG = "fhflAccepThread";
 
+    /**
+     *
+     * @param btAdapter BluetoothAdapter
+     * @param controller Controller
+     * @param uuID UUID
+     * @param serviceName String
+     */
     public AcceptThread(BluetoothAdapter btAdapter, Controller controller, UUID uuID, String serviceName) {
+
 
         mBluetoothAdapter = btAdapter;
         mController = controller;
@@ -64,7 +76,7 @@ public class AcceptThread extends Thread {
         while (true) {
             try {
                 debugOut("run(): listen");
-
+//                Log.v(TAG, "run");
                 socket = mServerSocket.accept();
             } catch (IOException e) {
                 debugOut("run(): Error: IOException during listen !!!");
@@ -76,7 +88,10 @@ public class AcceptThread extends Thread {
 
             // If a connection was accepted
             if (socket != null) {
-                // Do work to manage the connection (in a separate thread)
+                /*
+                Sendet den BluetoothSocket an den Controller. Dieser liest den Socket aus und startet einen
+                AcceptThread.
+                */
                 mController.obtainMessage(Controller.SmMessage.AT_MANAGE_CONNECTED_SOCKET.ordinal(),
                         -1, -1, socket).sendToTarget();
 
