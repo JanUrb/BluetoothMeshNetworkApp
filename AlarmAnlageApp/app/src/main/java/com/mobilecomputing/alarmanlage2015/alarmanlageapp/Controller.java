@@ -25,7 +25,18 @@ public class Controller extends StateMachine{
     private Activity mActivity = null;
     private BluetoothModel bt_model;
 
+    /**
+     * Serverthread
+     */
     private AcceptThread mAcceptThread;
+    /**
+     * Clientthread
+     */
+    private ConnectThread mConnectThread;
+
+    /**
+     * Verwaltet eine erfolgreiche Verbindung.
+     */
     private ConnectedThread mConnectedThread;
 
     BluetoothAdapter mBluetoothAdapter;
@@ -44,9 +55,11 @@ public class Controller extends StateMachine{
     public enum SmMessage {
         UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
         ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, CONNECT_TO_DEVICE, READ_PAIRED_DEVICES,
-        START_ACCEPT_THREAD,// Bluetooth Initiation
+        // Bluetooth Initiation
         CO_INIT,                                        // to Controller
-        AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,           // from AcceptThread
+        //Try connecting
+        FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT,
+        AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,          // from AcceptThread
         CT_RECEIVED, CT_CONNECTION_CLOSED, CT_DEBUG     // from ConnectedThread
     }
 
@@ -182,7 +195,7 @@ public class Controller extends StateMachine{
                         break;
 
 
-                    //unnötig für die funktion der app... TODO
+                    //unnötig für die funktion der app... TODO DELETE
                     case READ_PAIRED_DEVICES:
                         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
                         Log.d(TAG, "paired devices:");
@@ -193,7 +206,9 @@ public class Controller extends StateMachine{
                             }
                         }
 
-                        sendSmMessage(SmMessage.START_ACCEPT_THREAD.ordinal(), 0, 0, null);
+                        state = State.WAIT_FOR_CONNECT;
+                        sendSmMessage(SmMessage.CONNECT_AS_CLIENT.ordinal(), 0, 0, null);
+
                         break;
 
                     //Dieser State wird benutzt, um die App so lange anzuhalten, bis ein Intent erfolgreich
@@ -201,17 +216,7 @@ public class Controller extends StateMachine{
                     case WAIT_FOR_INTENT:
                         break;
 
-                    //TODO: In Wait_FOR_CONNECT auslagern?
-                    //AcceptThread startet
-                    case START_ACCEPT_THREAD:
-                        Log.d(TAG, "instanziere AcceptThread");
-                        mAcceptThread = new AcceptThread(mBluetoothAdapter, this, MY_UUID, mServiceName);
-                        mAcceptThread.start();
 
-                        mUiListener.onControllerServerInfo(true);
-                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
-                        state = State.WAIT_FOR_CONNECT;
-                        break;
 
 
                     default:
@@ -232,6 +237,39 @@ public class Controller extends StateMachine{
 //                        state = State.INIT_BT;
 //                        break;
 
+
+                    /*
+                    Versuche Discovery für ~12 secs. Wenn erfolgreich, nehme den Server-Socket des Device und
+                    erstelle einen RFComm-Socket und initiatiere mit connect().
+                     */
+                    case FIND_DEVICE:
+                        //bluetooth broadcast receiver here TODO
+                        if(!mBluetoothAdapter.startDiscovery()){
+
+                        }
+                        state = State.WAIT_FOR_CONNECT;
+
+
+                    case CONNECT_AS_CLIENT:
+                        Log.d(TAG, "instanziere ConnectThread");
+                        //Suche Geräte.
+
+
+                        break;
+
+
+
+                    //AcceptThread startet
+                    case CONNECT_AS_SERVER:
+                        Log.d(TAG, "instanziere AcceptThread");
+                        mAcceptThread = new AcceptThread(mBluetoothAdapter, this, MY_UUID, mServiceName);
+                        mAcceptThread.start();
+
+                        mUiListener.onControllerServerInfo(true);
+                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
+                        state = State.WAIT_FOR_CONNECT;
+                        break;
+
                     case AT_MANAGE_CONNECTED_SOCKET:
 
                         //Accept thread wird abbgebroche und ein neuer ConnectThread startet
@@ -246,6 +284,7 @@ public class Controller extends StateMachine{
                         mUiListener.onControllerConnectInfo("Connected");
                         state = State.CONNECTED;
                         break;
+
 
                     default:
                         Log.v(TAG, "SM WAIT_FOR_CONNECT: not a valid input in this state !!!!!!");
@@ -296,9 +335,14 @@ public class Controller extends StateMachine{
         sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0,null);
     }
 
-    public void discoverabilityEnabled(){
+    public void discoverabilityEnabled() {
         Log.d(TAG, "discoverabilityEnabled()");
         sendSmMessage(SmMessage.READ_PAIRED_DEVICES.ordinal(), 0, 0, null);
+    }
+
+    public void deviceDiscovered(BluetoothDevice bluetoothDevice){
+        Log.d(TAG, "deviceDiscovered: "+bluetoothDevice.getName());
+
     }
 
     public interface OnControllerInteractionListener {
