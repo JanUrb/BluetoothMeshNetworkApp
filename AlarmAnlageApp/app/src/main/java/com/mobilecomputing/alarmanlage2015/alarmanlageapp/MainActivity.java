@@ -57,11 +57,13 @@ public class MainActivity extends Activity {
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+
                 String action = intent.getAction();
 
                 if(BluetoothDevice.ACTION_FOUND.equals(action)){
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     Log.d(TAG, "onReceive: "+device.getName());
+                    controller.deviceDiscovered(device);
                 }
             }
         };

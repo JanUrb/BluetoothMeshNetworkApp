@@ -28,11 +28,11 @@ public class Controller extends StateMachine{
     /**
      * Serverthread
      */
-    private AcceptThread mAcceptThread;
+    private ServerThread mAcceptThread;
     /**
      * Clientthread
      */
-    private ConnectThread mConnectThread;
+    private ClientThread mClientThread;
 
     /**
      * Verwaltet eine erfolgreiche Verbindung.
@@ -41,7 +41,7 @@ public class Controller extends StateMachine{
 
     BluetoothAdapter mBluetoothAdapter;
     // Hier (0x1101 => Serial Port Profile + Base_UUID)
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private static final String mServiceName = "SerialPort";    //"KT-Service";
 
     //wird in der Activity abgefangen
@@ -59,8 +59,8 @@ public class Controller extends StateMachine{
         CO_INIT,                                        // to Controller
         //Try connecting
         FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT,
-        AT_MANAGE_CONNECTED_SOCKET, AT_DEBUG,          // from AcceptThread
-        CT_RECEIVED, CT_CONNECTION_CLOSED, CT_DEBUG     // from ConnectedThread
+        AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, AT_DEBUG_SERVER,           // from ServerThread
+        CT_RECEIVED, CT_CONNECTION_CLOSED, AT_DEBUG_CLIENT, CT_DEBUG     // from ConnectedThread
     }
 
     private enum State {
@@ -108,23 +108,22 @@ public class Controller extends StateMachine{
          */
         SmMessage inputSmMessage = messageIndex[message.what];
 
-        //Bis jetzt wird nur beim Senden das Message Objekt genutzt.
-        String deviceId;
-        try{
-            deviceId = (String) message.obj;
-        }catch (Exception e){
-            Log.d(TAG, e.getStackTrace().toString());
-        }
 
 
         // erstmal ohne SM-Logging die Debug-Meldungen der Threads verarbeiten
-        if ( inputSmMessage == SmMessage.AT_DEBUG ) {
-            Log.d("AcceptThread: ", (String) message.obj);
+        if ( inputSmMessage == SmMessage.AT_DEBUG_SERVER) {
+            Log.d(ServerThread.TAG, (String) message.obj);
             return;
         }
 
+        if ( inputSmMessage == SmMessage.AT_DEBUG_CLIENT) {
+            Log.d(ClientThread.TAG, (String) message.obj);
+            return;
+        }
+
+
         if ( inputSmMessage == SmMessage.CT_DEBUG ) {
-            Log.d("ConnectThread: ", (String) message.obj);
+            Log.d(ConnectedThread.TAG, (String) message.obj);
             return;
         }
 
@@ -147,8 +146,8 @@ public class Controller extends StateMachine{
 
                         state = State.INIT_BT;
                         sendSmMessage(SmMessage.ENABLE_BT.ordinal(), 0, 0, null);
-
                         break;
+
                     default:
                         Log.v(TAG, "SM: not a valid input in this state !!!!!!");
                         break;
@@ -207,7 +206,7 @@ public class Controller extends StateMachine{
                         }
 
                         state = State.WAIT_FOR_CONNECT;
-                        sendSmMessage(SmMessage.CONNECT_AS_CLIENT.ordinal(), 0, 0, null);
+                        sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
 
                         break;
 
@@ -229,40 +228,34 @@ public class Controller extends StateMachine{
             case WAIT_FOR_CONNECT:
                 switch (inputSmMessage) {
 
-//                    case UI_STOP_SERVER:
-//                        mAcceptThread.cancel();
-//
-//                        mUiListener.onControllerServerInfo(false);
-//                        mUiListener.onControllerConnectInfo("INIT_BT");
-//                        state = State.INIT_BT;
-//                        break;
-
-
                     /*
                     Versuche Discovery für ~12 secs. Wenn erfolgreich, nehme den Server-Socket des Device und
                     erstelle einen RFComm-Socket und initiatiere mit connect().
                      */
                     case FIND_DEVICE:
+                        Log.d(TAG, "suche devices");
                         //bluetooth broadcast receiver here TODO
                         if(!mBluetoothAdapter.startDiscovery()){
-
+                            Log.d(TAG, "discovery not starting...");
                         }
                         state = State.WAIT_FOR_CONNECT;
-
+                        break;
 
                     case CONNECT_AS_CLIENT:
-                        Log.d(TAG, "instanziere ConnectThread");
-                        //Suche Geräte.
-
-
+                        Log.d(TAG, "instanziere ClientThread");
+                        //der Broadcast Receiver aus der MainActivity sendet das Bluetoothdevice
+                        BluetoothDevice bluetoothDevice = (BluetoothDevice) message.obj;
+                        mClientThread = new ClientThread(bluetoothDevice, mBluetoothAdapter, this);
+                        mClientThread.start();
+                        state = State.WAIT_FOR_CONNECT;
                         break;
 
 
 
-                    //AcceptThread startet
+                    //ServerThread startet
                     case CONNECT_AS_SERVER:
-                        Log.d(TAG, "instanziere AcceptThread");
-                        mAcceptThread = new AcceptThread(mBluetoothAdapter, this, MY_UUID, mServiceName);
+                        Log.d(TAG, "instanziere ServerThread");
+                        mAcceptThread = new ServerThread(mBluetoothAdapter, this, mServiceName);
                         mAcceptThread.start();
 
                         mUiListener.onControllerServerInfo(true);
@@ -270,10 +263,10 @@ public class Controller extends StateMachine{
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
-                    case AT_MANAGE_CONNECTED_SOCKET:
-
-                        //Accept thread wird abbgebroche und ein neuer ConnectThread startet
-                        //An dieser Stelle muss ein neuer AcceptThread gestartet werden. Es kann nicht
+                    case AT_MANAGE_CONNECTED_SOCKET_AS_SERVER:
+                        Log.d(TAG, "manage connected Socket als Server");
+                        //Accept thread wird abbgebroche und ein neuer ClientThread startet
+                        //An dieser Stelle muss ein neuer ServerThread gestartet werden. Es kann nicht
                         //mehr als 7 Geräte gleichzeitig gestartet werden (Bluetooth Standard)
                         //TODO Neuer State
                         mAcceptThread.cancel();
@@ -285,6 +278,14 @@ public class Controller extends StateMachine{
                         state = State.CONNECTED;
                         break;
 
+                    case AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT:
+                        Log.d(TAG, "manage connected Socket als Client");
+                        mClientThread.cancel();
+                        mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
+                        mConnectedThread.start();
+
+                        state = State.CONNECTED;
+                        break;
 
                     default:
                         Log.v(TAG, "SM WAIT_FOR_CONNECT: not a valid input in this state !!!!!!");
@@ -342,7 +343,7 @@ public class Controller extends StateMachine{
 
     public void deviceDiscovered(BluetoothDevice bluetoothDevice){
         Log.d(TAG, "deviceDiscovered: "+bluetoothDevice.getName());
-
+        sendSmMessage(SmMessage.CONNECT_AS_CLIENT.ordinal(), 0, 0, bluetoothDevice);
     }
 
     public interface OnControllerInteractionListener {

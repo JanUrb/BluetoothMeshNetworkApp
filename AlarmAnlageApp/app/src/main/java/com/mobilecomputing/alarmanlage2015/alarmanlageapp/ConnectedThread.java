@@ -15,6 +15,7 @@ import java.io.OutputStream;
  */
 public class ConnectedThread extends Thread {
 
+    public final static String TAG = "fhflConnectedThread";
     private Controller mController;
     private final BluetoothSocket mSocket;
     private final InputStream mInStream;
@@ -31,7 +32,7 @@ public class ConnectedThread extends Thread {
         InputStream tmpIn = null;
         OutputStream tmpOut = null;
 
-        debugOut("ConnectedThread()");
+        debugOut("Konstruktor");
 
         // Get the input and output streams, using temp objects because
         // member streams are final
@@ -39,7 +40,10 @@ public class ConnectedThread extends Thread {
             tmpIn = socket.getInputStream();
             tmpOut = socket.getOutputStream();
         } catch (IOException e) {
+            e.printStackTrace();
+            debugOut(e.getMessage());
             debugOut("ConnectedThread(): Error: IOException during get streams !!!");
+
         }
 
         mInStream = tmpIn;
@@ -61,6 +65,9 @@ public class ConnectedThread extends Thread {
                         .sendToTarget(); // obtain...(): delivers 'empty' message-object from a pool
             } catch (IOException e) {
                 debugOut("run(): IOException during read stream");
+                e.printStackTrace();
+                debugOut("Error: "+e.getMessage());
+
                 mController.obtainMessage(Controller.SmMessage.CT_CONNECTION_CLOSED.ordinal(), -1, -1, null).sendToTarget();
                 break;
             }
