@@ -50,6 +50,7 @@ public class ClientThread extends Thread {
 
     public void run() {
         debugOut("ClientThread.run()");
+        //verbindet sich mit dem anderen device und wird in die statemachine geschickt.
         // Cancel discovery because it will slow down the connection
         if (!mBluetoothAdapter.cancelDiscovery()) {
             debugOut("cancelDiscovery() failed!!");
@@ -59,11 +60,16 @@ public class ClientThread extends Thread {
             //blockiert den Thread!
             //Der Vorgang wirft einen Service Discovery Failed Error, wenn ein Gerät gefunden wurde,
             // aber nicht der Service.
+
             mmSocket.connect();
             mController.obtainMessage(Controller.SmMessage.AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT.ordinal(),
                     -1, -1, mmSocket).sendToTarget();
         } catch (IOException connectException) {
             connectException.printStackTrace();
+            //an dieser Stelle erhalte ich den Fehler read failed, socket might closed or timeout, read ret: -1
+            //google hat ergeben: http://stackoverflow.com/a/25647197
+            //Versionen mit denen getestet wurde: 4.1.2 (lvl 16) -> fehlgeschlagen
+            //                                    5.1.1 (lvl 22) -> erfolgreich
             debugOut("ClientThread.run " + connectException.getMessage());
             Log.d(TAG, "connectingError: " + connectException.getMessage());
 
@@ -75,6 +81,9 @@ public class ClientThread extends Thread {
                 debugOut("Schliessen des Sockets nicht erfolgreich!");
             }
             return;
+        } catch (NullPointerException nullExe){
+            nullExe.printStackTrace();
+            debugOut("ClientThread.run");
         }
     }
 

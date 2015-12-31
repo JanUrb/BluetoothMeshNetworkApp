@@ -280,7 +280,7 @@ public class Controller extends StateMachine{
 
                     case AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT:
                         Log.d(TAG, "manage connected Socket als Client");
-                        mClientThread.cancel();
+                        //mClientThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
                         mConnectedThread.start();
 

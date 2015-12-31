@@ -9,9 +9,8 @@ import java.io.OutputStream;
 
 /**
  * Created by Jan Urbansky on 19.12.2015.
- *
- *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
- *
+ * <p/>
+ * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  */
 public class ConnectedThread extends Thread {
 
@@ -22,7 +21,6 @@ public class ConnectedThread extends Thread {
     private final OutputStream mOutStream;
 
     /**
-     *
      * @param socket
      * @param controller
      */
@@ -48,13 +46,23 @@ public class ConnectedThread extends Thread {
 
         mInStream = tmpIn;
         mOutStream = tmpOut;
+
+
+        try {
+            mInStream.available();
+        } catch (IOException e) {
+                debugOut("mInStream not available");
+                debugOut("Error: "+e.getMessage());
+        }
     }
+
 
     public void run() {
         byte[] buffer = new byte[1024];  // buffer store for the stream
         int bytes; // bytes returned from read()
 
         debugOut("run()");
+
 
         // Keep listening to the InputStream until an exception occurs
         while (true) {
@@ -66,7 +74,7 @@ public class ConnectedThread extends Thread {
             } catch (IOException e) {
                 debugOut("run(): IOException during read stream");
                 e.printStackTrace();
-                debugOut("Error: "+e.getMessage());
+                debugOut("Error: " + e.getMessage());
 
                 mController.obtainMessage(Controller.SmMessage.CT_CONNECTION_CLOSED.ordinal(), -1, -1, null).sendToTarget();
                 break;
@@ -97,5 +105,7 @@ public class ConnectedThread extends Thread {
 
     private void debugOut(String str) {
         mController.obtainMessage(Controller.SmMessage.CT_DEBUG.ordinal(), -1, -1, str).sendToTarget();
-    };
+    }
+
+    ;
 }
