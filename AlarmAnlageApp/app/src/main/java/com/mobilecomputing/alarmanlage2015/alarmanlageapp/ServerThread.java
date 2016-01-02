@@ -52,8 +52,6 @@ public class ServerThread extends Thread {
                 debugOut("ServerThread(): Error: IOException during get server-socket !!!");
                 return;
             }
-
-
             mServerSocket = tmp;
         }
 

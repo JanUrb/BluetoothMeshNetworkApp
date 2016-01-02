@@ -48,7 +48,7 @@ public class ServerTimerThread extends Thread {
                 Log.d(TAG, "serverThread wird gecancelt.");
                 serverThread.cancel();
                 Log.d(TAG, "sende FIND_DEVICE an controller");
-                mController.sendSmMessage(Controller.SmMessage.FIND_DEVICE.ordinal(),0,0,null);
+                mController.sendSmMessageWithoutLog(Controller.SmMessage.FIND_DEVICE.ordinal(),0,0,null);
             }
 
         } catch (InterruptedException e) {
