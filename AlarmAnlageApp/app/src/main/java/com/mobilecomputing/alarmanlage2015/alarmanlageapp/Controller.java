@@ -258,8 +258,8 @@ public class Controller extends StateMachine{
                         mAcceptThread = new ServerThread(mBluetoothAdapter, this, mServiceName);
                         mAcceptThread.start();
 
-                        mUiListener.onControllerServerInfo(true);
-                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
+//                        mUiListener.onControllerServerInfo(true);
+//                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
@@ -268,13 +268,13 @@ public class Controller extends StateMachine{
                         //Accept thread wird abbgebroche und ein neuer ClientThread startet
                         //An dieser Stelle muss ein neuer ServerThread gestartet werden. Es kann nicht
                         //mehr als 7 Geräte gleichzeitig gestartet werden (Bluetooth Standard)
-                        //TODO Neuer State
+
                         mAcceptThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
                         mConnectedThread.start();
 
-                        mUiListener.onControllerServerInfo(true);
-                        mUiListener.onControllerConnectInfo("Connected");
+//                        mUiListener.onControllerServerInfo(true);
+//                        mUiListener.onControllerConnectInfo("Connected");
                         state = State.CONNECTED;
                         break;
 
