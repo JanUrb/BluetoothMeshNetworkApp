@@ -2,19 +2,20 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.widget.Toast;
+
 
 import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
 
-import fllog.Log;
+import java.util.Timer;
 
-import static android.bluetooth.BluetoothAdapter.ACTION_REQUEST_ENABLE;
+import fllog.Log;
 
 public class MainActivity extends Activity {
 
@@ -25,7 +26,7 @@ public class MainActivity extends Activity {
     /**
      * Empfängt
      */
-    private BroadcastReceiver mReceiver;
+    private BroadcastReceiver mBroadCastReceiver;
     public static MainActivity instance = null; //?
 
     private CommunicationModel communicator;
@@ -54,25 +55,9 @@ public class MainActivity extends Activity {
         mainFrag.setController(controller);
 
 
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String action = intent.getAction();
-
-                if(BluetoothDevice.ACTION_FOUND.equals(action)){
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    Log.d(TAG, "onReceive: "+device.getName());
-                    controller.deviceDiscovered(device);
-                }
-            }
-        };
-
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        registerReceiver(mReceiver, filter);
+        initBroadcastReceiver();
 
         controller.init(this, mainFrag, bt_model);
-
 
 
 //        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
@@ -93,25 +78,65 @@ public class MainActivity extends Activity {
 //        }
     }
 
+    /**
+     * Initialisiert den Broadcast Receiver und registriert ihn für
+     * BluetoothDevice.ACTION_FOUND, BluetoothAdapter.ACTION_DISCOVERY_STARTED(für Tests) und
+     * BluetoothAdapter.ACTION_DISCOVERY_FINISHED
+     */
+    public void initBroadcastReceiver() {
+        mBroadCastReceiver = new BroadcastReceiver() {
 
+            private long startTime;
+            private boolean deviceFound = false;
 
+            @Override
+            public void onReceive(Context context, Intent intent) {
 
-    public void initBroadcastReceiver(){
+                String action = intent.getAction();
 
+                if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    Log.d(TAG, "onReceive - device name: " + device.getName());
+                    deviceFound = true;
+                    controller.deviceDiscovered(device);
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
+                    Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
+                    //Wenn ein Gerät gefunden wurde übernimmt der ACTION_FOUND Zweig den Übergang in den nächsten State
+                    //Wenn kein Gerät gefunden wurde, wird ein ServerThread gestartet.
+                    if (!deviceFound) {
+                        Log.d(TAG, "onReceive - start Server Routine");
+                    }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                    Log.d(TAG, "onReceive - Discovery Started");
+                    startTime = System.currentTimeMillis();
+                    deviceFound = false;
+
+                }
+            }
+        };
+        IntentFilter actionFoundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        IntentFilter discoveryStartedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        IntentFilter discoveryFinishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+        //der Receiver handelt die actions.
+        registerReceiver(mBroadCastReceiver, actionFoundFilter);
+        registerReceiver(mBroadCastReceiver, discoveryStartedFilter);
+        registerReceiver(mBroadCastReceiver, discoveryFinishedFilter);
     }
-
 
 
     /**
      * Dieser Handler fängt die im Controller gestarteten Intents ab und gibt diese entsprechend weiter.
-     * @param requestCode
-     * @param resultCode
-     * @param data
+     *
+     * @param requestCode int
+     * @param resultCode  int
+     * @param data        Intent
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         Log.d(TAG, "onActivityResult()");
-        switch (requestCode){
+        switch (requestCode) {
             case Controller.REQUEST_ENABLE_BT:
                 controller.bluetoothAdapterEnabled(); //es folgt discoverarbility
                 break;
@@ -121,7 +146,7 @@ public class MainActivity extends Activity {
                 break;
 
             default:
-                Log.v(TAG, "Unbekannter requestCode: "+requestCode);
+                Log.v(TAG, "Unbekannter requestCode: " + requestCode);
         }
     }
 
