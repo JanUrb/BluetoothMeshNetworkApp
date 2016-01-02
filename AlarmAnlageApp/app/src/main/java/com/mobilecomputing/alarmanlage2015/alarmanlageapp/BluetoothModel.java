@@ -24,7 +24,7 @@ public class BluetoothModel extends Observable {
      */
     private Set<BluetoothDevice> connectedDevices = null;
 
-
+    private Set<Connection> connections = null;
 
     private String messageReceivedFrom = "";
 
@@ -59,6 +59,7 @@ public class BluetoothModel extends Observable {
     }
 
     public String getMyBT_ADDR() {
+        Log.d(TAG, "getMyBT_ADDR");
         return myBT_ADDR;
     }
 
@@ -71,8 +72,22 @@ public class BluetoothModel extends Observable {
     }
 
     public void setConnectedDevices(Set<BluetoothDevice> connectedDevices) {
+        Log.d(TAG, "setConnectedDevices");
         this.connectedDevices = connectedDevices;
     }
+
+    public void addConnection(Connection connection){
+        Log.d(TAG, "addConnection");
+        connections.add(connection);
+    }
+
+    public void removeConnection(Connection connection){
+        Log.d(TAG, "removeConnection");
+        if(!connections.remove(connection)){
+            Log.d(TAG, "connection nicht entfernt");
+        }
+    }
+
 
     /**
      * Sonst müsste man in jedem Setter setChanged und notifyObservers
@@ -80,7 +95,7 @@ public class BluetoothModel extends Observable {
      */
     @Override
     public void notifyObservers() {
-        Log.d(TAG, "notifyObservers");
+        Log.v(TAG, "notifyObservers");
         super.setChanged();
         super.notifyObservers();
     }
