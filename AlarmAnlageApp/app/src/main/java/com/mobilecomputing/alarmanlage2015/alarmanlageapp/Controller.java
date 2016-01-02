@@ -14,11 +14,10 @@ import fllog.Log;
 
 /**
  * Created by Jan Urbansky on 19.12.2015.
- *
- *  Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
- *
+ * <p/>
+ * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  */
-public class Controller extends StateMachine{
+public class Controller extends StateMachine {
 
     private static final String TAG = "fhflController";
     private OnControllerInteractionListener mUiListener = null;
@@ -48,7 +47,6 @@ public class Controller extends StateMachine{
     public static final int REQUEST_ENABLE_BT = 1;
     //Enable discoverability
     public static final int REQUEST_ENABLE_DISCO = 2;
-
 
 
     //TODO: UI_States entfernen und neue hinzufügen.
@@ -95,13 +93,13 @@ public class Controller extends StateMachine{
 
     /**
      * the statemachine
-     *
-     *   call it only via sendSmMessage()
+     * <p/>
+     * call it only via sendSmMessage()
      *
      * @param message
      */
     @Override
-    void theBrain(android.os.Message message){
+    void theBrain(android.os.Message message) {
 
         /**
          * inputSmMessage ist nicht die Message selber. Nur der enum Wert.
@@ -109,20 +107,19 @@ public class Controller extends StateMachine{
         SmMessage inputSmMessage = messageIndex[message.what];
 
 
-
         // erstmal ohne SM-Logging die Debug-Meldungen der Threads verarbeiten
-        if ( inputSmMessage == SmMessage.AT_DEBUG_SERVER) {
+        if (inputSmMessage == SmMessage.AT_DEBUG_SERVER) {
             Log.d(ServerThread.TAG, (String) message.obj);
             return;
         }
 
-        if ( inputSmMessage == SmMessage.AT_DEBUG_CLIENT) {
+        if (inputSmMessage == SmMessage.AT_DEBUG_CLIENT) {
             Log.d(ClientThread.TAG, (String) message.obj);
             return;
         }
 
 
-        if ( inputSmMessage == SmMessage.CT_DEBUG ) {
+        if (inputSmMessage == SmMessage.CT_DEBUG) {
             Log.d(ConnectedThread.TAG, (String) message.obj);
             return;
         }
@@ -131,12 +128,12 @@ public class Controller extends StateMachine{
         Log.i(TAG, "SM: state: " + state + ", input message: " +
                 inputSmMessage.toString() + ", arg1: " +
                 message.arg1 + ", arg2: " + message.arg2);
-         if (message.obj != null){
-             Log.i(TAG, "SM: data: " + message.obj.toString());
-         }
+        if (message.obj != null) {
+            Log.i(TAG, "SM: data: " + message.obj.toString());
+        }
 
         // der Rest
-        switch ( state ) {
+        switch (state) {
             case START:
                 switch (inputSmMessage) {
                     case CO_INIT:
@@ -171,14 +168,14 @@ public class Controller extends StateMachine{
                         bt_model.setMyBT_ADDR(mBluetoothAdapter.getAddress());
 
 
-                        if ( !mBluetoothAdapter.isEnabled() ) {
+                        if (!mBluetoothAdapter.isEnabled()) {
                             Log.d(TAG, "Try to enable Bluetooth.");
                             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                             mActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
                             //warte auf den Intent
                             sendSmMessage(SmMessage.WAIT_FOR_INTENT.ordinal(), 0, 0, null);
 
-                        }else{
+                        } else {
                             sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0, null);
                         }
                         break;
@@ -216,13 +213,11 @@ public class Controller extends StateMachine{
                         break;
 
 
-
-
                     default:
                         Log.v(TAG, "SM INIT_BT: not a valid input in this state !!!!!!");
                         break;
                 }
-                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
+                Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
                 break;
 
             case WAIT_FOR_CONNECT:
@@ -235,14 +230,21 @@ public class Controller extends StateMachine{
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
                         //bluetooth broadcast receiver here TODO
-                        if(!mBluetoothAdapter.startDiscovery()){
+                        if (!mBluetoothAdapter.startDiscovery()) {
                             Log.d(TAG, "discovery not starting...");
                         }
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
+                    //clientseitiger Verbindungsaufbau
                     case CONNECT_AS_CLIENT:
                         Log.d(TAG, "instanziere ClientThread");
+                        //Aufräumarbeiten falls etwas falsch läuft.
+                        if (mAcceptThread != null && mAcceptThread.isAlive()) {
+                            Log.d(TAG, "clean up AcceptThread");
+                            mAcceptThread.cancel();
+                            mAcceptThread = null;
+                        }
                         //der Broadcast Receiver aus der MainActivity sendet das Bluetoothdevice
                         BluetoothDevice bluetoothDevice = (BluetoothDevice) message.obj;
                         mClientThread = new ClientThread(bluetoothDevice, mBluetoothAdapter, this);
@@ -250,14 +252,18 @@ public class Controller extends StateMachine{
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
-
-
-                    //ServerThread startet
+                    //Serverseitiger Verbindungsaufbau
                     case CONNECT_AS_SERVER:
                         Log.d(TAG, "instanziere ServerThread");
+                        if(mClientThread != null && mClientThread.isAlive()){
+                            Log.d(TAG, "clean up ClientThread");
+                            mClientThread.cancel();
+                            mClientThread = null;
+                        }
                         mAcceptThread = new ServerThread(mBluetoothAdapter, this, mServiceName);
+                        ServerTimerThread timerThread = new ServerTimerThread(mAcceptThread, this);
                         mAcceptThread.start();
-
+                        timerThread.start();
 //                        mUiListener.onControllerServerInfo(true);
 //                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
                         state = State.WAIT_FOR_CONNECT;
@@ -270,7 +276,7 @@ public class Controller extends StateMachine{
                         //mehr als 7 Geräte gleichzeitig gestartet werden (Bluetooth Standard)
 
                         mAcceptThread.cancel();
-                        mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
+                        mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
                         mConnectedThread.start();
 
 //                        mUiListener.onControllerServerInfo(true);
@@ -281,7 +287,7 @@ public class Controller extends StateMachine{
                     case AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT:
                         Log.d(TAG, "manage connected Socket als Client");
                         //mClientThread.cancel();
-                        mConnectedThread = new ConnectedThread((BluetoothSocket)message.obj, this);
+                        mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
                         mConnectedThread.start();
 
                         state = State.CONNECTED;
@@ -291,7 +297,7 @@ public class Controller extends StateMachine{
                         Log.v(TAG, "SM WAIT_FOR_CONNECT: not a valid input in this state !!!!!!");
                         break;
                 }
-                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
+                Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
                 break;
 
             case CONNECTED:
@@ -325,15 +331,15 @@ public class Controller extends StateMachine{
                         Log.v(TAG, "SM: not a valid input in this state !!!!!!");
                         break;
                 }
-                Log.v(TAG, "STATE: "+state +" INPUT: "+inputSmMessage);
+                Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
         }
-         Log.i(TAG, "SM: new State: " + state);
-     }
+        Log.i(TAG, "SM: new State: " + state);
+    }
 
-
-    public void bluetoothAdapterEnabled(){
+    //TODO Rename!!
+    public void bluetoothAdapterEnabled() {
         Log.d(TAG, "bluetoothAdapterEnabled");
-        sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0,null);
+        sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0, null);
     }
 
     public void discoverabilityEnabled() {
@@ -341,14 +347,21 @@ public class Controller extends StateMachine{
         sendSmMessage(SmMessage.READ_PAIRED_DEVICES.ordinal(), 0, 0, null);
     }
 
-    public void deviceDiscovered(BluetoothDevice bluetoothDevice){
-        Log.d(TAG, "deviceDiscovered: "+bluetoothDevice.getName());
+    public void startClientThread(BluetoothDevice bluetoothDevice) {
+        Log.d(TAG, "startClientThread: " + bluetoothDevice.getName());
         sendSmMessage(SmMessage.CONNECT_AS_CLIENT.ordinal(), 0, 0, bluetoothDevice);
+    }
+
+    public void startServerThread(){
+        Log.d(TAG, "startServerThread()");
+        sendSmMessage(SmMessage.CONNECT_AS_SERVER.ordinal(), 0, 0, null);
     }
 
     public interface OnControllerInteractionListener {
         public void onControllerReceived(String str);
+
         public void onControllerConnectInfo(String strState);
+
         public void onControllerServerInfo(Boolean serverInfo);
     }
 

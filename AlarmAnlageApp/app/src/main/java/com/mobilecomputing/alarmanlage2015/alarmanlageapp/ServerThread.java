@@ -5,7 +5,9 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
-import java.util.UUID;
+
+
+import android.util.Log;
 
 /**
  * Created by Jan Urbansky on 19.12.2015.
@@ -14,7 +16,7 @@ import java.util.UUID;
  * Ist die Serverseite der Verbindung.
  */
 public class ServerThread extends Thread {
-    public static final String TAG = "fhflAccepThread";
+    public static final String TAG = "fhflAcceptThread";
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothServerSocket mServerSocket;
     private Controller mController;
@@ -38,7 +40,7 @@ public class ServerThread extends Thread {
 
         if (mBluetoothAdapter == null) {
             debugOut("ServerThread(): Error: mBluetoothAdapter == null");
-            return;
+
         } else {
             BluetoothServerSocket tmp = null;
             try {
@@ -50,7 +52,7 @@ public class ServerThread extends Thread {
                 debugOut("ServerThread(): Error: IOException during get server-socket !!!");
                 return;
             }
-            ;
+
 
             mServerSocket = tmp;
         }
@@ -60,13 +62,10 @@ public class ServerThread extends Thread {
     public void run() {
         BluetoothSocket socket = null;
 
-        debugOut("ServerThread.run()");
-
-        // Keep listening until exception occurs or a socket is returned
         while (true) {
             try {
                 debugOut("run(): listen");
-//                Log.v(TAG, "run");
+                //blockiert den Thread
                 socket = mServerSocket.accept();
             } catch (IOException e) {
                 debugOut("run(): Error: IOException during listen !!!");
@@ -110,6 +109,7 @@ public class ServerThread extends Thread {
             debugOut("cancel() ServerThread: IOException during closing socket !!!");
         }
     }
+
 
     private void debugOut(String str) {
         mController.obtainMessage(Controller.SmMessage.AT_DEBUG_SERVER.ordinal(),

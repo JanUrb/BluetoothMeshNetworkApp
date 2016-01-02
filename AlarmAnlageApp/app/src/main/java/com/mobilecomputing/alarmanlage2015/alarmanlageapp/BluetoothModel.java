@@ -28,20 +28,20 @@ public class BluetoothModel extends Observable {
 
     private String messageReceivedFrom = "";
 
-    public BluetoothModel(){
+    public BluetoothModel() {
         Log.d(TAG, "BluetoothModel()");
     }
 
 
     //Setter
 
-    public void setPairedDevices(Set<BluetoothDevice> bt_devices){
+    public void setPairedDevices(Set<BluetoothDevice> bt_devices) {
         Log.d(TAG, "setPairedDevices()");
         pairedDevices = bt_devices;
         notifyObservers();
     }
 
-    public void setMyBT_ADDR(String bt_addr){
+    public void setMyBT_ADDR(String bt_addr) {
         Log.d(TAG, "setMyBT_ADDR");
         myBT_ADDR = bt_addr;
         notifyObservers();
@@ -76,14 +76,14 @@ public class BluetoothModel extends Observable {
         this.connectedDevices = connectedDevices;
     }
 
-    public void addConnection(Connection connection){
+    public void addConnection(Connection connection) {
         Log.d(TAG, "addConnection");
         connections.add(connection);
     }
 
-    public void removeConnection(Connection connection){
+    public void removeConnection(Connection connection) {
         Log.d(TAG, "removeConnection");
-        if(!connections.remove(connection)){
+        if (!connections.remove(connection)) {
             Log.d(TAG, "connection nicht entfernt");
         }
     }

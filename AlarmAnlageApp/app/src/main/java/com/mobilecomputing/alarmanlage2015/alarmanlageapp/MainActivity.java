@@ -13,8 +13,6 @@ import android.os.Bundle;
 
 import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
 
-import java.util.Timer;
-
 import fllog.Log;
 
 public class MainActivity extends Activity {
@@ -99,7 +97,7 @@ public class MainActivity extends Activity {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     Log.d(TAG, "onReceive - device name: " + device.getName());
                     deviceFound = true;
-                    controller.deviceDiscovered(device);
+                    controller.startClientThread(device);
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
                     Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
@@ -107,6 +105,7 @@ public class MainActivity extends Activity {
                     //Wenn kein Gerät gefunden wurde, wird ein ServerThread gestartet.
                     if (!deviceFound) {
                         Log.d(TAG, "onReceive - start Server Routine");
+                        controller.startServerThread();
                     }
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                     Log.d(TAG, "onReceive - Discovery Started");

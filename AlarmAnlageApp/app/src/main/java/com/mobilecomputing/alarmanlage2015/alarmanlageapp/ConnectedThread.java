@@ -51,8 +51,8 @@ public class ConnectedThread extends Thread {
         try {
             mInStream.available();
         } catch (IOException e) {
-                debugOut("mInStream not available");
-                debugOut("Error: "+e.getMessage());
+            debugOut("mInStream not available");
+            debugOut("Error: " + e.getMessage());
         }
     }
 
