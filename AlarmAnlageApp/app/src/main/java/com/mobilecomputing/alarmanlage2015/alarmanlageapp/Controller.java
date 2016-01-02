@@ -278,7 +278,7 @@ public class Controller extends StateMachine {
                         mAcceptThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
                         mConnectedThread.start();
-
+                        //TODO Connection Class verwenden
 //                        mUiListener.onControllerServerInfo(true);
 //                        mUiListener.onControllerConnectInfo("Connected");
                         state = State.CONNECTED;
@@ -289,7 +289,7 @@ public class Controller extends StateMachine {
                         //mClientThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
                         mConnectedThread.start();
-
+                        //TODO Connection Class verwenden
                         state = State.CONNECTED;
                         break;
 
