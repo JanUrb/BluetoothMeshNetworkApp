@@ -63,7 +63,7 @@ public class ServerThread extends Thread {
         while (true) {
             try {
                 debugOut("run(): listen");
-                //blockiert den Thread
+                //blockiert den Thread -> wird vom ServerTimerThread durch aufrufen der cancel() Methode gebrochen.
                 socket = mServerSocket.accept();
             } catch (IOException e) {
                 debugOut("run(): Error: IOException during listen !!!");

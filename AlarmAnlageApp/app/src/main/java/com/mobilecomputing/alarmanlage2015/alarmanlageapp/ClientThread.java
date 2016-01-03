@@ -3,16 +3,22 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.ParcelUuid;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.UUID;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 
 /**
  * Created by Jan Urbansky on 29.12.2015.
  * <p/>
  * Übernommen von
  * https://developer.android.com/guide/topics/connectivity/bluetooth.html#ConnectingAsAClient
+ * <p/>
+ * Debugging mit debugOut und android.util.Log
  */
 public class ClientThread extends Thread {
     public final static String TAG = "fhflClientThread";
@@ -36,15 +42,19 @@ public class ClientThread extends Thread {
         debugOut("ClientThread()");
 
 
-        this.mBluetoothAdapter = mBluetoothAdapter;
         // Get a BluetoothSocket to connect with the given BluetoothDevice
         try {
-            // MY_UUID is the app's UUID string, also used by the server code
+//
             tmp = mmDevice.createRfcommSocketToServiceRecord(Controller.MY_UUID);
-        } catch (IOException e) {
-            Log.d(TAG, "rfcommExcecption: " + e.getLocalizedMessage());
-            debugOut("Rfcomm Socket nicht erstellt:  " + e.getMessage());
+//            Method m = device.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
+//            tmp = (BluetoothSocket) m.invoke(device, 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Exception " + e.getMessage());
         }
+
+        //tmp = mmDevice.createRfcommSocketToServiceRecord(Controller.MY_UUID);
+
         mmSocket = tmp;
     }
 
@@ -60,7 +70,7 @@ public class ClientThread extends Thread {
             //blockiert den Thread!
             //Der Vorgang wirft einen Service Discovery Failed Error, wenn ein Gerät gefunden wurde,
             // aber nicht der Service.
-
+            // An dieser Stelle scheitert eins meiner Testgeräte mit API LVL 16.
             mmSocket.connect();
             mController.obtainMessage(Controller.SmMessage.AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT.ordinal(),
                     -1, -1, mmSocket).sendToTarget();
@@ -70,6 +80,27 @@ public class ClientThread extends Thread {
             //google hat ergeben: http://stackoverflow.com/a/25647197
             //Versionen mit denen getestet wurde: 4.1.2 (lvl 16) -> fehlgeschlagen
             //                                    5.1.1 (lvl 22) -> erfolgreich
+            //Mit entfernen und neu verkoppeln kann das Problem (manchmal) behoben werden!
+
+            //Ein Fixversuch war über Reflection an den privaten Konstruktor der Klasse zu kommen und dort den Port einzustellen. Dies scheint der Fehlergrund zu sein.
+            // Allerdings führt das zur Fehlermeldung: Socket Operation on non-Socket.
+            //Die Argumente sind: new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
+//        new ParcelUuid(uuid))
+//        Class[] btSocketArgs = new Class[7];
+//            btSocketArgs[0] = Integer.TYPE;
+//            btSocketArgs[1] = Integer.TYPE;
+//            btSocketArgs[2] = Boolean.TYPE;
+//            btSocketArgs[3] = Boolean.TYPE;
+//            btSocketArgs[4] = BluetoothDevice.class;
+//            btSocketArgs[5] = Integer.TYPE;
+//            btSocketArgs[6] = ParcelUuid.class;
+//
+//            Constructor<BluetoothSocket> c = BluetoothSocket.class.getDeclaredConstructor(btSocketArgs);
+//            c.setAccessible(true);
+//            tmp = (BluetoothSocket)c.newInstance(1, 1, true, true, mmDevice, -1, new ParcelUuid(Controller.MY_UUID));
+
+
+
             debugOut("ClientThread.run " + connectException.getMessage());
             Log.d(TAG, "connectingError: " + connectException.getMessage());
 
@@ -81,9 +112,9 @@ public class ClientThread extends Thread {
                 debugOut("Schliessen des Sockets nicht erfolgreich!");
             }
             return;
-        } catch (NullPointerException nullExe){
+        } catch (NullPointerException nullExe) {
             nullExe.printStackTrace();
-            debugOut("ClientThread.run");
+            debugOut("ClientThread.run null exception");
         }
     }
 

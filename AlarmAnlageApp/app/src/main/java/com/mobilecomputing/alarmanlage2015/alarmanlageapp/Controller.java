@@ -57,12 +57,14 @@ public class Controller extends StateMachine {
         CO_INIT,                                        // to Controller
         //Try connecting
         FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT,
+        //THREAD_CONNECTED
+        MAX_THREAD_NUMBER, START_NEW_CONNECTION_CYCLE,
         AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, AT_DEBUG_SERVER,           // from ServerThread
         CT_RECEIVED, CT_CONNECTION_CLOSED, AT_DEBUG_CLIENT, CT_DEBUG     // from ConnectedThread
     }
 
     private enum State {
-        START, INIT_BT, WAIT_FOR_CONNECT, CONNECTED
+        START, INIT_BT, WAIT_FOR_CONNECT, THREAD_CONNECTED
     }
 
     private State state = State.START;        // the state variable
@@ -220,6 +222,7 @@ public class Controller extends StateMachine {
                 Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
                 break;
 
+            //verwaltet das Erstellen einer Verbindung als Client oder als Server.
             case WAIT_FOR_CONNECT:
                 switch (inputSmMessage) {
 
@@ -281,7 +284,7 @@ public class Controller extends StateMachine {
                         //TODO Connection Class verwenden
 //                        mUiListener.onControllerServerInfo(true);
 //                        mUiListener.onControllerConnectInfo("Connected");
-                        state = State.CONNECTED;
+                        state = State.THREAD_CONNECTED;
                         break;
 
                     case AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT:
@@ -290,7 +293,7 @@ public class Controller extends StateMachine {
                         mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
                         mConnectedThread.start();
                         //TODO Connection Class verwenden
-                        state = State.CONNECTED;
+                        state = State.THREAD_CONNECTED;
                         break;
 
                     default:
@@ -300,8 +303,23 @@ public class Controller extends StateMachine {
                 Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
                 break;
 
-            case CONNECTED:
+            //THREAD_CONNECTED verwaltet einen Zustand mit mindestens einem verbundenen Thread.
+            case THREAD_CONNECTED:
                 switch (inputSmMessage) {
+
+                    case START_NEW_CONNECTION_CYCLE:
+                        state = State.WAIT_FOR_CONNECT;
+                        sendSmMessage(SmMessage.FIND_DEVICE.ordinal(),0,0,null);
+                        break;
+
+
+                    //warte auf das beenden eines ConnectedThreads
+                    case MAX_THREAD_NUMBER:
+
+                        state = State.THREAD_CONNECTED;
+                        break;
+
+
 
                     case UI_SEND:
                         mConnectedThread.write(((String) message.obj).getBytes());

@@ -12,6 +12,10 @@ import android.util.Log;
  * Modus eingeschaltet ist.
  *
  * Wenn ein Serverthread mit cancel beendet wird, fordert der ServerTimer einen neuen ClientThread an.
+ *
+ *
+ *
+ * Das Logging ist mit android.util.Log TODO!!
  */
 public class ServerTimerThread extends Thread {
     private static final String TAG = "fhflServerTimer";
