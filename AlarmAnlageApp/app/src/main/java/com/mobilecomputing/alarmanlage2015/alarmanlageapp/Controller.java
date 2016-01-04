@@ -236,7 +236,7 @@ public class Controller extends StateMachine {
                      */
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
-                        //bluetooth broadcast receiver here TODO
+                        //siehe BroadcastReceiver und Filter in der MainActivity
                         if (!mBluetoothAdapter.startDiscovery()) {
                             Log.d(TAG, "discovery not starting...");
                         }
