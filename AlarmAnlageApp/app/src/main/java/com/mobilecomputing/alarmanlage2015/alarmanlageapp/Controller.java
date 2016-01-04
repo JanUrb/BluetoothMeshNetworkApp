@@ -41,6 +41,8 @@ public class Controller extends StateMachine {
     BluetoothAdapter mBluetoothAdapter;
     // Hier (0x1101 => Serial Port Profile + Base_UUID)
     public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
+    public static final int MAX_NUMBER_OF_DEVICES = 7;
     private static final String mServiceName = "SerialPort";    //"KT-Service";
 
     //wird in der Activity abgefangen
@@ -288,6 +290,7 @@ public class Controller extends StateMachine {
                         mConnectedThread = new ConnectedThread(socket, this);
                         Connection connection = new Connection(mConnectedThread, btDevice);
                         connection.start();
+                        bt_model.addConnection(connection);
                         //TODO Connection Class verwenden
 //                        mUiListener.onControllerServerInfo(true);
 //                        mUiListener.onControllerConnectInfo("Connected");
@@ -299,7 +302,9 @@ public class Controller extends StateMachine {
                         Log.d(TAG, "manage connected Socket als Client");
                         //mClientThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
-                        mConnectedThread.start();
+                        Connection clientConnection = new Connection(mConnectedThread, ((BluetoothSocket) message.obj).getRemoteDevice());
+                        clientConnection.start();
+                        bt_model.addConnection(clientConnection);
                         //TODO Connection Class verwenden
                         state = State.THREAD_CONNECTED;
                         sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);

@@ -3,6 +3,7 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 
+import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
 
@@ -19,12 +20,12 @@ public class BluetoothModel extends Observable {
     //verbunden waren.
     private Set<BluetoothDevice> pairedDevices = null;
     private String myBT_ADDR = "";
-    /**
-     * Die verbunden Geräte.
-     */
-    private Set<BluetoothDevice> connectedDevices = null;
 
-    private Set<Connection> connections = null;
+    /**
+     *  Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet. 
+     *
+     */
+    private Set<Connection> connections = new HashSet<Connection>(Controller.MAX_NUMBER_OF_DEVICES);
 
     private String messageReceivedFrom = "";
 
@@ -67,18 +68,11 @@ public class BluetoothModel extends Observable {
         return messageReceivedFrom;
     }
 
-    public Set<BluetoothDevice> getConnectedDevices() {
-        return connectedDevices;
-    }
-
-    public void setConnectedDevices(Set<BluetoothDevice> connectedDevices) {
-        Log.d(TAG, "setConnectedDevices");
-        this.connectedDevices = connectedDevices;
-    }
 
     public void addConnection(Connection connection) {
         Log.d(TAG, "addConnection");
         connections.add(connection);
+        notifyObservers();
     }
 
     public void removeConnection(Connection connection) {
@@ -88,6 +82,9 @@ public class BluetoothModel extends Observable {
         }
     }
 
+    public Set<Connection> getConnections(){
+        return connections;
+    }
 
     /**
      * Sonst müsste man in jedem Setter setChanged und notifyObservers

@@ -118,13 +118,20 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
             for(BluetoothDevice device:bt_model.getPairedDevices()){
                 str.append(device.getAddress()+"\n");
             }
-            device_list.setText(str.toString());
+//            device_list.setText(str.toString()); TODO: Entfernen.
         }
         if(!bt_model.getMyBT_ADDR().isEmpty()){
             my_bt_addr.setText(bt_model.getMyBT_ADDR());
         }
         if(!bt_model.getMessageReceivedFrom().isEmpty()){
             received_message.setText(bt_model.getMessageReceivedFrom());
+        }
+        if( bt_model.getConnections() != null && !bt_model.getConnections().isEmpty()){
+            StringBuilder str = new StringBuilder();
+            for(Connection connection:bt_model.getConnections()){
+                str.append(connection.getDeviceAddress());
+            }
+            device_list.setText(str.toString());
         }
     }
 }

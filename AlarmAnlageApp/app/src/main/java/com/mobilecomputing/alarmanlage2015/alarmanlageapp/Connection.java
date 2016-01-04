@@ -2,6 +2,8 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.bluetooth.BluetoothDevice;
 
+import java.util.UUID;
+
 import fllog.Log;
 
 /**
@@ -21,5 +23,9 @@ public class Connection {
     public void start(){
         Log.d(TAG, "start()");
         connectedThread.start();
+    }
+
+    public String getDeviceAddress(){
+        return bluetoothDevice.getAddress();
     }
 }
