@@ -22,7 +22,7 @@ public class BluetoothModel extends Observable {
     private String myBT_ADDR = "";
 
     /**
-     *  Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet. 
+     *  Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet.
      *
      */
     private Set<Connection> connections = new HashSet<Connection>(Controller.MAX_NUMBER_OF_DEVICES);

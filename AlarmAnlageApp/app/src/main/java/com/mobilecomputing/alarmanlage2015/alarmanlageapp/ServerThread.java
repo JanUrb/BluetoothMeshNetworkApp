@@ -16,7 +16,7 @@ import android.util.Log;
  * Ist die Serverseite der Verbindung.
  */
 public class ServerThread extends Thread {
-    public static final String TAG = "fhflAcceptThread";
+    public static final String TAG = "fhflServerThread";
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothServerSocket mServerSocket;
     private Controller mController;
