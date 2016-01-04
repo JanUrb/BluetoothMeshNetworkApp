@@ -59,7 +59,7 @@ public class Controller extends StateMachine {
         FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT,
         //THREAD_CONNECTED
         MAX_THREAD_NUMBER, START_NEW_CONNECTION_CYCLE,
-        AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, AT_DEBUG_SERVER,           // from ServerThread
+        AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, AT_DEBUG_SERVER, AT_DEBUG_TIMER,          // from ServerThread
         CT_RECEIVED, CT_CONNECTION_CLOSED, AT_DEBUG_CLIENT, CT_DEBUG     // from ConnectedThread
     }
 
@@ -120,6 +120,10 @@ public class Controller extends StateMachine {
             return;
         }
 
+        if(inputSmMessage == SmMessage.AT_DEBUG_TIMER){
+            Log.d(ServerTimerThread.TAG, (String) message.obj);
+            return;
+        }
 
         if (inputSmMessage == SmMessage.CT_DEBUG) {
             Log.d(ConnectedThread.TAG, (String) message.obj);

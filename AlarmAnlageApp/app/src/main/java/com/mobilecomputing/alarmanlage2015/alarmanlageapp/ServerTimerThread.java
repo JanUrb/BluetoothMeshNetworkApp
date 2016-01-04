@@ -18,7 +18,7 @@ import android.util.Log;
  * Das Logging ist mit android.util.Log TODO!!
  */
 public class ServerTimerThread extends Thread {
-    private static final String TAG = "fhflServerTimer";
+    public static final String TAG = "fhflServerTimer";
     private long runtime = 0;
     private ServerThread serverThread = null;
     private Controller mController = null;
@@ -44,7 +44,7 @@ public class ServerTimerThread extends Thread {
 
     @Override
     public void run() {
-        Log.d(TAG, "run()");
+        debugOut("run()");
         try {
             sleep(runtime);
             Log.d(TAG, "Attempting to cancel..");
@@ -68,7 +68,14 @@ public class ServerTimerThread extends Thread {
     private long calculateRuntime() {
         long add_time = (long) (Math.random() * MAX_ADD_TIME);
         Log.d(TAG, "calculateRuntime(): " + (RUN_TIME + add_time) + " add_time: " + add_time);
+        debugOut("calculateRuntime(): " + (RUN_TIME + add_time) + " add_time: " + add_time);
         return RUN_TIME + add_time;
+    }
+
+
+    private void debugOut(String str) {
+        mController.obtainMessage(Controller.SmMessage.AT_DEBUG_TIMER.ordinal(),
+                -1, -1, str).sendToTarget();
     }
 
 }
