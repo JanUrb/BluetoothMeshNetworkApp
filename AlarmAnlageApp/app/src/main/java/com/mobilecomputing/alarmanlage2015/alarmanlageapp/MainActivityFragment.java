@@ -10,8 +10,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.Observable;
 import java.util.Observer;
 
@@ -76,7 +74,7 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
             public void onClick(View v) {
                 Log.d(TAG, "onClickListener");
                 String address = address_input.getText().toString();
-                controller.sendSmMessage(Controller.SmMessage.UI_SEND.ordinal(), 0, 0, address);
+                controller.sendSmMessage(Controller.SmMessage.SEND_MESSAGE.ordinal(), 0, 0, address);
             }
         });
 
@@ -129,7 +127,7 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         if( bt_model.getConnections() != null && !bt_model.getConnections().isEmpty()){
             StringBuilder str = new StringBuilder();
             for(Connection connection:bt_model.getConnections()){
-                str.append(connection.getDeviceAddress());
+                str.append(connection.getDeviceAddress()+"\n");
             }
             device_list.setText(str.toString());
         }
