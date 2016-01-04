@@ -84,14 +84,13 @@ public class ConnectedThread extends Thread {
     }
 
     /* Call this from the main activity to send data to the remote device */
-    public void write(byte[] bytes) {
-        try {
-            String sendStr = new String(bytes);
-            debugOut("write(" + sendStr + ")");
+    public void write(byte[] bytes) throws IOException {
+        debugOut("write");
 
-            mOutStream.write(bytes);
-        } catch (IOException e) {
-        }
+        String sendStr = new String(bytes);
+        debugOut("write(" + sendStr + ")");
+
+        mOutStream.write(bytes);
     }
 
     /* Call this from the main activity to shutdown the connection */
@@ -105,7 +104,7 @@ public class ConnectedThread extends Thread {
 
     private void debugOut(String str) {
         //C-ID steht für Connecton ID und ist ist die Thread ID.
-        str = "C-ID "+this.getId()+ ": "+str;
+        str = "C-ID " + this.getId() + ": " + str;
         mController.obtainMessage(Controller.SmMessage.CT_DEBUG.ordinal(), -1, -1, str).sendToTarget();
     }
 

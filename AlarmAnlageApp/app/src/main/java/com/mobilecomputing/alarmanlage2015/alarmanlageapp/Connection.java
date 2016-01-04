@@ -2,6 +2,7 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.bluetooth.BluetoothDevice;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import fllog.Log;
@@ -26,10 +27,12 @@ public class Connection {
     }
 
     public String getDeviceAddress(){
+        Log.d(TAG, "getDeviceAddress");
         return bluetoothDevice.getAddress();
     }
 
-    public void write(String msg){
+    public void write(Message msg) throws IOException {
+        Log.d(TAG, "write");
         connectedThread.write(msg.getBytes());
 
     }

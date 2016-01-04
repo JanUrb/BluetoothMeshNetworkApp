@@ -7,6 +7,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.Set;
 import java.util.UUID;
 
@@ -122,7 +125,7 @@ public class Controller extends StateMachine {
             return;
         }
 
-        if(inputSmMessage == SmMessage.AT_DEBUG_TIMER){
+        if (inputSmMessage == SmMessage.AT_DEBUG_TIMER) {
             Log.d(ServerTimerThread.TAG, (String) message.obj);
             return;
         }
@@ -132,31 +135,47 @@ public class Controller extends StateMachine {
             return;
         }
 
-        if (inputSmMessage == SmMessage.CT_RECEIVED){
-            String msg = new String((byte[]) message.obj, 0, message.arg1);
-            Log.d(ConnectedThread.TAG, "MessageReceived: "+message);
-            bt_model.setMessageReceivedFrom(msg);
+        if (inputSmMessage == SmMessage.CT_RECEIVED) {
+            Log.d(TAG, "inputSmMessage == SmMessage.CT_RECEIVED");
+            Message receivedMsg = null;
+            byte[] bytes = (byte[]) message.obj;
+
+            //Quelle: https://stackoverflow.com/questions/5837698/converting-any-object-to-a-byte-array-in-java
+            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+            try {
+                ObjectInputStream o = new ObjectInputStream(b);
+                receivedMsg = (Message) o.readObject();
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "SmMessage.CT_RECEIVED IOError: " + e.getMessage());
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                Log.d(TAG, "SmMessage.CT_RECEIVED ClassNotFound: " + e.getMessage());
+            }
+            Log.v(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
+            bt_model.setCurrentMessage(receivedMsg);
             return;
         }
 
 
-        if (inputSmMessage == SmMessage.SEND_MESSAGE){
+        if (inputSmMessage == SmMessage.SEND_MESSAGE) {
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
             String btAddress = (String) message.obj;
-
+            Message sendMessage = null;
             //TODO: in Methode auslagern!
             //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
-            if(!BluetoothAdapter.checkBluetoothAddress(btAddress)){
+            if (!BluetoothAdapter.checkBluetoothAddress(btAddress)) {
                 //Error TODO: Throw Exception
                 Log.d(TAG, "mac addresse nicht valid");
                 //testing... TODO: Entfernen!!
-                btAddress = ((Connection)bt_model.getConnections().toArray()[0]).getDeviceAddress();
+                btAddress = ((Connection) bt_model.getConnections().toArray()[0]).getDeviceAddress();
+                sendMessage = new Message(mBluetoothAdapter.getAddress(), btAddress);
             }
             //überprüfe ob die BT Adresse direkt zu erreichen ist.
             boolean directlyConnected = false;
             Connection directConnection = null;
-            for(Connection connection :bt_model.getConnections()){
-                if(connection.getDeviceAddress().equals(btAddress)){
+            for (Connection connection : bt_model.getConnections()) {
+                if (connection.getDeviceAddress().equals(btAddress)) {
                     directlyConnected = true;
                     directConnection = connection;
                     break; //das Gerät wurde schon gefunden -> keine Suche mehr nötig.
@@ -164,11 +183,21 @@ public class Controller extends StateMachine {
             }
 
             //senden der Nachricht TODO: Nachrichten Klasse erstellen mit ID und TargetMac
-            if(directlyConnected){
-                directConnection.write("Ping");
-            }else{
-                for(Connection connection:bt_model.getConnections()){
-                    connection.write("Ping");
+            if (directlyConnected) {
+                try {
+                    directConnection.write(sendMessage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "IOException directlyConnected " + e.getMessage());
+                }
+            } else {
+                for (Connection connection : bt_model.getConnections()) {
+                    try {
+                        connection.write(sendMessage);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        Log.d(TAG, "IOException Indirectly Connected " + e.getMessage());
+                    }
                 }
             }
 
@@ -306,7 +335,7 @@ public class Controller extends StateMachine {
                     //Serverseitiger Verbindungsaufbau
                     case CONNECT_AS_SERVER:
                         Log.d(TAG, "instanziere ServerThread");
-                        if(mClientThread != null && mClientThread.isAlive()){
+                        if (mClientThread != null && mClientThread.isAlive()) {
                             Log.d(TAG, "clean up ClientThread");
                             mClientThread.cancel();
                             mClientThread = null;
@@ -366,7 +395,7 @@ public class Controller extends StateMachine {
                     case START_NEW_CONNECTION_CYCLE:
                         //teste ob die MAX_NUM_CONNECTION_THREADS erreicht wurde.
                         state = State.WAIT_FOR_CONNECT;
-                        sendSmMessage(SmMessage.FIND_DEVICE.ordinal(),0,0,null);
+                        sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
                         break;
 
 
@@ -376,11 +405,6 @@ public class Controller extends StateMachine {
                         state = State.THREAD_CONNECTED;
                         break;
 
-
-                    //TODO REMOVE wird über der StateMachine abgefangen.
-                    case SEND_MESSAGE:
-                        mConnectedThread.write(((String) message.obj).getBytes());
-                        break;
 
                     //bei uns gibt es mehrere CT. Hier muss gefiltert werden, ob die Nachricht an mich
                     //gesendet werden soll.
@@ -427,7 +451,7 @@ public class Controller extends StateMachine {
         sendSmMessage(SmMessage.CONNECT_AS_CLIENT.ordinal(), 0, 0, bluetoothDevice);
     }
 
-    public void startServerThread(){
+    public void startServerThread() {
         Log.d(TAG, "startServerThread()");
         sendSmMessage(SmMessage.CONNECT_AS_SERVER.ordinal(), 0, 0, null);
     }
