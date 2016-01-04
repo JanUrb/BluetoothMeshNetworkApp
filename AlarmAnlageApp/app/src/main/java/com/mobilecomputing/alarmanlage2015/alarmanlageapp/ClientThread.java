@@ -54,6 +54,10 @@ public class ClientThread extends Thread {
         mmSocket = tmp;
     }
 
+    /**
+     *  Versucht sich mit dem Device zu verbinden. Wenn dies fehlschlägt, wird in den ServerModus
+     *  übergegangen
+     */
     public void run() {
         debugOut("ClientThread.run()");
         //verbindet sich mit dem anderen device und wird in die statemachine geschickt.
@@ -95,11 +99,11 @@ public class ClientThread extends Thread {
 //            c.setAccessible(true);
 //            tmp = (BluetoothSocket)c.newInstance(1, 1, true, true, mmDevice, -1, new ParcelUuid(Controller.MY_UUID));
 
-
-
             debugOut("ClientThread.run " + connectException.getMessage());
             Log.d(TAG, "connectingError: " + connectException.getMessage());
 
+            mController.obtainMessage(Controller.SmMessage.CONNECT_AS_SERVER.ordinal(),
+                    -1, -1, mmSocket).sendToTarget();
             // Unable to connect; close the socket and get out
             try {
                 mmSocket.close();
@@ -139,8 +143,5 @@ public class ClientThread extends Thread {
             e.printStackTrace();
             Log.d("ClientThread", "" + e.getMessage());
         }
-
     }
-
-
 }

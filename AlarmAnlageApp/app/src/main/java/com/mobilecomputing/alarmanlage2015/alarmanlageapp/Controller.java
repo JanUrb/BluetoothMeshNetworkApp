@@ -283,12 +283,16 @@ public class Controller extends StateMachine {
                         //mehr als 7 Geräte gleichzeitig gestartet werden (Bluetooth Standard)
 
                         mAcceptThread.cancel();
-                        mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
-                        mConnectedThread.start();
+                        BluetoothSocket socket = (BluetoothSocket) message.obj;
+                        BluetoothDevice btDevice = socket.getRemoteDevice();
+                        mConnectedThread = new ConnectedThread(socket, this);
+                        Connection connection = new Connection(mConnectedThread, btDevice);
+                        connection.start();
                         //TODO Connection Class verwenden
 //                        mUiListener.onControllerServerInfo(true);
 //                        mUiListener.onControllerConnectInfo("Connected");
                         state = State.THREAD_CONNECTED;
+                        sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
                         break;
 
                     case AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT:
@@ -298,6 +302,7 @@ public class Controller extends StateMachine {
                         mConnectedThread.start();
                         //TODO Connection Class verwenden
                         state = State.THREAD_CONNECTED;
+                        sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
                         break;
 
                     default:
@@ -312,6 +317,7 @@ public class Controller extends StateMachine {
                 switch (inputSmMessage) {
 
                     case START_NEW_CONNECTION_CYCLE:
+                        //teste ob die MAX_NUM_CONNECTION_THREADS erreicht wurde.
                         state = State.WAIT_FOR_CONNECT;
                         sendSmMessage(SmMessage.FIND_DEVICE.ordinal(),0,0,null);
                         break;
