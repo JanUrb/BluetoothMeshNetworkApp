@@ -132,6 +132,13 @@ public class Controller extends StateMachine {
             return;
         }
 
+        if (inputSmMessage == SmMessage.CT_RECEIVED){
+            String msg = new String((byte[]) message.obj, 0, message.arg1);
+            Log.d(ConnectedThread.TAG, "MessageReceived: "+message);
+            bt_model.setMessageReceivedFrom(msg);
+            return;
+        }
+
 
         if (inputSmMessage == SmMessage.SEND_MESSAGE){
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
@@ -142,6 +149,8 @@ public class Controller extends StateMachine {
             if(!BluetoothAdapter.checkBluetoothAddress(btAddress)){
                 //Error TODO: Throw Exception
                 Log.d(TAG, "mac addresse nicht valid");
+                //testing... TODO: Entfernen!!
+                btAddress = ((Connection)bt_model.getConnections().toArray()[0]).getDeviceAddress();
             }
             //überprüfe ob die BT Adresse direkt zu erreichen ist.
             boolean directlyConnected = false;
@@ -180,7 +189,7 @@ public class Controller extends StateMachine {
                     case CO_INIT:
                         Log.v(TAG, "in Init");
 
-                        mUiListener.onControllerConnectInfo("INIT_BT"); //kann raus
+//                        mUiListener.onControllerConnectInfo("INIT_BT"); //kann raus
 
                         state = State.INIT_BT;
                         sendSmMessage(SmMessage.ENABLE_BT.ordinal(), 0, 0, null);
@@ -199,7 +208,7 @@ public class Controller extends StateMachine {
                         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                         if (mBluetoothAdapter == null) {
                             Log.d(TAG, "Error: Device does not support Bluetooth !!!");
-                            mUiListener.onControllerServerInfo(false);
+//                            mUiListener.onControllerServerInfo(false);
 
                             state = State.INIT_BT; //fallback in init_bt state
                             break;
@@ -375,21 +384,21 @@ public class Controller extends StateMachine {
 
                     //bei uns gibt es mehrere CT. Hier muss gefiltert werden, ob die Nachricht an mich
                     //gesendet werden soll.
-                    //TODO
-                    case CT_RECEIVED:
-                        String str = new String((byte[]) message.obj, 0, message.arg1);
-                        bt_model.setMessageReceivedFrom(str);
-
-                        //mUiListener.onControllerReceived( str );
-                        break;
+                    //TODO RM
+//                    case CT_RECEIVED:
+//                        String str = new String((byte[]) message.obj, 0, message.arg1);
+//                        bt_model.setMessageReceivedFrom(str);
+//
+//                        //mUiListener.onControllerReceived( str );
+//                        break;
 
                     //Das verbundene Gerät aus dem Geräte speicher löschen. ? Einfach mit boundDevices(?) im
                     case CT_CONNECTION_CLOSED:
                     case UI_STOP_SERVER:
                         mConnectedThread.cancel();
 
-                        mUiListener.onControllerServerInfo(false);
-                        mUiListener.onControllerConnectInfo("INIT_BT");
+//                        mUiListener.onControllerServerInfo(false);
+//                        mUiListener.onControllerConnectInfo("INIT_BT");
                         state = State.INIT_BT;
                         break;
 
@@ -424,11 +433,8 @@ public class Controller extends StateMachine {
     }
 
     public interface OnControllerInteractionListener {
+        //TODO: Parameter in MessageObj ändern.
         public void onControllerReceived(String str);
-
-        public void onControllerConnectInfo(String strState);
-
-        public void onControllerServerInfo(Boolean serverInfo);
     }
 
 }

@@ -92,19 +92,12 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         this.bt_model.addObserver(this);
     }
 
+
+
     @Override
     public void onControllerReceived(String str) {
         Log.d(TAG, "onControllerReceived");
-    }
-
-    @Override
-    public void onControllerConnectInfo(String strState) {
-        Log.d(TAG, "onControllerConnectInfo");
-    }
-
-    @Override
-    public void onControllerServerInfo(Boolean serverInfo) {
-        Log.d(TAG, "onControllerServerInfo");
+        received_message.setText(str);
     }
 
     @Override
