@@ -83,6 +83,7 @@ public class BluetoothModel extends Observable {
     }
 
     public Set<Connection> getConnections(){
+        Log.d(TAG, "getConnections");
         return connections;
     }
 

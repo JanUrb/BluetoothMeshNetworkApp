@@ -104,6 +104,8 @@ public class ConnectedThread extends Thread {
     }
 
     private void debugOut(String str) {
+        //C-ID steht für Connecton ID und ist ist die Thread ID.
+        str = "C-ID "+this.getId()+ ": "+str;
         mController.obtainMessage(Controller.SmMessage.CT_DEBUG.ordinal(), -1, -1, str).sendToTarget();
     }
 

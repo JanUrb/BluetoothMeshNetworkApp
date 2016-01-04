@@ -28,4 +28,9 @@ public class Connection {
     public String getDeviceAddress(){
         return bluetoothDevice.getAddress();
     }
+
+    public void write(String msg){
+        connectedThread.write(msg.getBytes());
+
+    }
 }

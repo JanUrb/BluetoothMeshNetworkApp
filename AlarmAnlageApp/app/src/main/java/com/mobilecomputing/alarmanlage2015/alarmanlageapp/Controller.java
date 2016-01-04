@@ -53,7 +53,7 @@ public class Controller extends StateMachine {
 
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
-        UI_START_SERVER, UI_STOP_SERVER, UI_SEND,       // from UI
+        UI_START_SERVER, UI_STOP_SERVER, SEND_MESSAGE,       // from UI
         ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, CONNECT_TO_DEVICE, READ_PAIRED_DEVICES,
         // Bluetooth Initiation
         CO_INIT,                                        // to Controller
@@ -130,6 +130,39 @@ public class Controller extends StateMachine {
         if (inputSmMessage == SmMessage.CT_DEBUG) {
             Log.d(ConnectedThread.TAG, (String) message.obj);
             return;
+        }
+
+
+        if (inputSmMessage == SmMessage.SEND_MESSAGE){
+            Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
+            String btAddress = (String) message.obj;
+
+            //TODO: in Methode auslagern!
+            //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
+            if(!BluetoothAdapter.checkBluetoothAddress(btAddress)){
+                //Error TODO: Throw Exception
+                Log.d(TAG, "mac addresse nicht valid");
+            }
+            //überprüfe ob die BT Adresse direkt zu erreichen ist.
+            boolean directlyConnected = false;
+            Connection directConnection = null;
+            for(Connection connection :bt_model.getConnections()){
+                if(connection.getDeviceAddress().equals(btAddress)){
+                    directlyConnected = true;
+                    directConnection = connection;
+                    break; //das Gerät wurde schon gefunden -> keine Suche mehr nötig.
+                }
+            }
+
+            //senden der Nachricht TODO: Nachrichten Klasse erstellen mit ID und TargetMac
+            if(directlyConnected){
+                directConnection.write("Ping");
+            }else{
+                for(Connection connection:bt_model.getConnections()){
+                    connection.write("Ping");
+                }
+            }
+
         }
 
         // jetzt gehts erst richtig los
@@ -335,8 +368,8 @@ public class Controller extends StateMachine {
                         break;
 
 
-
-                    case UI_SEND:
+                    //TODO REMOVE wird über der StateMachine abgefangen.
+                    case SEND_MESSAGE:
                         mConnectedThread.write(((String) message.obj).getBytes());
                         break;
 
