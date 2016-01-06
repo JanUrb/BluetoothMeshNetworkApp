@@ -6,6 +6,8 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.UUID;
 
+import fllog.Log;
+
 /**
  * Die Message-Klasse besteht aus der MAC-Adresse des Empfängers und aus einer ID.
  * Die ID wird beim Aufrufen des Konstruktors erstellt.
@@ -16,6 +18,7 @@ import java.util.UUID;
  * Created by Jan Urbansky on 04.01.2016.
  */
 public class Message implements Serializable{
+    private static final String TAG = "fhflMessage";
     private UUID messageId;
     private String messageTargetMac;
     private String messageSourceMac;
@@ -32,10 +35,12 @@ public class Message implements Serializable{
     }
 
     public String getMessageSourceMac() {
+        Log.d(TAG, "getMessageSourceMac");
         return messageSourceMac;
     }
 
     public String getMessageTargetMac() {
+        Log.d(TAG, "getMessageTargetMac");
         return messageTargetMac;
     }
 
@@ -45,6 +50,7 @@ public class Message implements Serializable{
      * @throws IOException
      */
     public byte[] getBytes() throws IOException {
+        Log.d(TAG, "getBytes()");
         ByteArrayOutputStream b = new ByteArrayOutputStream();
         ObjectOutputStream o = null;
         o = new ObjectOutputStream(b);
