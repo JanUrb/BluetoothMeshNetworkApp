@@ -113,8 +113,7 @@ public class Controller extends StateMachine {
          */
         SmMessage inputSmMessage = messageIndex[message.what];
 
-
-        // erstmal ohne SM-Logging die Debug-Meldungen der Threads verarbeiten
+        //Alle diese Messages kommen von Threads.
         if (inputSmMessage == SmMessage.AT_DEBUG_SERVER) {
             Log.d(ServerThread.TAG, (String) message.obj);
             return;
@@ -145,6 +144,8 @@ public class Controller extends StateMachine {
             try {
                 ObjectInputStream o = new ObjectInputStream(b);
                 receivedMsg = (Message) o.readObject();
+                Log.d(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
+                bt_model.setCurrentMessage(receivedMsg);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.d(TAG, "SmMessage.CT_RECEIVED IOError: " + e.getMessage());
@@ -152,8 +153,7 @@ public class Controller extends StateMachine {
                 e.printStackTrace();
                 Log.d(TAG, "SmMessage.CT_RECEIVED ClassNotFound: " + e.getMessage());
             }
-            Log.v(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
-            bt_model.setCurrentMessage(receivedMsg);
+
             return;
         }
 
@@ -163,8 +163,18 @@ public class Controller extends StateMachine {
             try {
                 sendDeviceToDeviceMessage(message);
             } catch (Exception e) {
+                Log.d(TAG, "Sending message failed!!");
                 e.printStackTrace();
             }
+
+        }
+
+        if(inputSmMessage == SmMessage.CT_CONNECTION_CLOSED){
+            long connectionID = (Long)message.obj; //long als Objekt, wie int -> Integer
+            Log.d(TAG, "CT_CONNECTION_CLOSED ID: "+ connectionID);
+            if(!bt_model.removeConnection(connectionID)){
+                Log.d(TAG, "connection not found.."); //TODO: Toast.
+            };
 
         }
 
@@ -277,8 +287,13 @@ public class Controller extends StateMachine {
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
                         //siehe BroadcastReceiver und Filter in der MainActivity
+                        if(mBluetoothAdapter.isDiscovering()){
+                            Log.d(TAG, "already discovering");
+                        }
                         if (!mBluetoothAdapter.startDiscovery()) {
                             Log.d(TAG, "discovery not starting...");
+                            //starte einen server
+
                         }
                         state = State.WAIT_FOR_CONNECT;
                         break;
@@ -371,7 +386,7 @@ public class Controller extends StateMachine {
 
 
                     //Das verbundene Gerät aus dem Geräte speicher löschen. ? Einfach mit boundDevices(?) im
-                    case CT_CONNECTION_CLOSED:
+
                     case UI_STOP_SERVER:
                         mConnectedThread.cancel();
 

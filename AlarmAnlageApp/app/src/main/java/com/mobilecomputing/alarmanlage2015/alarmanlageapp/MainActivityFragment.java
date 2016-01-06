@@ -119,11 +119,17 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
             String txt = "SRC: "+currentMsg.getMessageSourceMac() +" ID: "+currentMsg.getMessageId();
             received_message.setText(txt);
         }
-        if( bt_model.getConnections() != null && !bt_model.getConnections().isEmpty()){
+        if( bt_model.getConnections() != null){
             StringBuilder str = new StringBuilder();
-            for(Connection connection:bt_model.getConnections()){
-                str.append(connection.getDeviceAddress()+"\n");
+            if(!bt_model.getConnections().isEmpty()){
+                for(Connection connection:bt_model.getConnections()){
+                    str.append(connection.getDeviceAddress() + "\n");
+                }
+            }else{
+                str.append("No connected devices");
             }
+
+
             device_list.setText(str.toString());
         }
     }

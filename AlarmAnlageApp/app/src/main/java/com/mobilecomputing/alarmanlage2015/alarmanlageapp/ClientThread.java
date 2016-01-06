@@ -64,6 +64,7 @@ public class ClientThread extends Thread {
         // Cancel discovery because it will slow down the connection
         if (!mBluetoothAdapter.cancelDiscovery()) {
             debugOut("cancelDiscovery() failed!!");
+            cancel();
         }
 
         try {
@@ -104,7 +105,7 @@ public class ClientThread extends Thread {
 
             mController.obtainMessage(Controller.SmMessage.CONNECT_AS_SERVER.ordinal(),
                     -1, -1, mmSocket).sendToTarget();
-            // Unable to connect; close the socket and get out
+
             try {
                 mmSocket.close();
             } catch (IOException closeException) {

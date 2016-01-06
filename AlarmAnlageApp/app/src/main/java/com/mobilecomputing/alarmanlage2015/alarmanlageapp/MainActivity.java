@@ -80,6 +80,10 @@ public class MainActivity extends Activity {
      * Initialisiert den Broadcast Receiver und registriert ihn für
      * BluetoothDevice.ACTION_FOUND, BluetoothAdapter.ACTION_DISCOVERY_STARTED(für Tests) und
      * BluetoothAdapter.ACTION_DISCOVERY_FINISHED
+     *
+     * Es darf pro Discovery Cycle nur mit einem Gerät eine Verbindung aufgebaut werden. Dazu wird
+     * die deviceFound Variable genutzt.
+     *
      */
     public void initBroadcastReceiver() {
         mBroadCastReceiver = new BroadcastReceiver() {
@@ -95,9 +99,18 @@ public class MainActivity extends Activity {
                 if (BluetoothDevice.ACTION_FOUND.equals(action)) {
 
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    Log.d(TAG, "onReceive - device name: " + device.getName());
-                    deviceFound = true;
-                    controller.startClientThread(device);
+                    Log.d(TAG, "onReceive - device name: " + device.getName() +" Device ID: "+device.getAddress());
+                    //wenn die Grenze !deviceFound nicht eingebaut wird, können viele Threads vom
+                    //Controller gestartet werden. Dies führt zu unberechenbarem Verhalten.
+                    if(BluetoothModel.BANNED_DEVICE_ADDRESSES.contains(device.getAddress())){
+                        Log.d(TAG, "(Ignored device) found banned device: "+device.getName() + "MAC: "+device.getAddress());
+                    }else if(!bt_model.isDeviceAlreadyConnected(device.getAddress()) && !deviceFound){
+                        deviceFound = true;
+                        controller.startClientThread(device);
+                    }else{
+                        Log.d(TAG, "onReceive - device already connected or cycle full: " + device.getAddress());
+                    }
+
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
                     Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
@@ -107,11 +120,11 @@ public class MainActivity extends Activity {
                         Log.d(TAG, "onReceive - start Server Routine");
                         controller.startServerThread();
                     }
+                    deviceFound = false;
                 } else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
                     Log.d(TAG, "onReceive - Discovery Started");
                     startTime = System.currentTimeMillis();
                     deviceFound = false;
-
                 }
             }
         };

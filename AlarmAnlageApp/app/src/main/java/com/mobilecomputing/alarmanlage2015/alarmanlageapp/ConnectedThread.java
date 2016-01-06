@@ -12,13 +12,14 @@ import java.io.OutputStream;
  * <p/>
  * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  */
-public class ConnectedThread extends Thread {
+public class ConnectedThread extends Thread{
 
     public final static String TAG = "fhflConnectedThread";
     private Controller mController;
     private final BluetoothSocket mSocket;
     private final InputStream mInStream;
     private final OutputStream mOutStream;
+
 
     /**
      * @param socket
@@ -76,7 +77,7 @@ public class ConnectedThread extends Thread {
                 e.printStackTrace();
                 debugOut("Error: " + e.getMessage());
 
-                mController.obtainMessage(Controller.SmMessage.CT_CONNECTION_CLOSED.ordinal(), -1, -1, null).sendToTarget();
+                mController.obtainMessage(Controller.SmMessage.CT_CONNECTION_CLOSED.ordinal(), -1, -1, this.getId()).sendToTarget();
                 break;
             }
         }
@@ -108,5 +109,4 @@ public class ConnectedThread extends Thread {
         mController.obtainMessage(Controller.SmMessage.CT_DEBUG.ordinal(), -1, -1, str).sendToTarget();
     }
 
-    ;
 }
