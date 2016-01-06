@@ -1,8 +1,10 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
-import android.bluetooth.BluetoothAdapter;
+
 import android.bluetooth.BluetoothDevice;
 
+
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
@@ -16,14 +18,20 @@ public class BluetoothModel extends Observable {
 
     private final static String TAG = "fhflBluetoothModel";
 
+    /**
+     * Die BANNED_DEVICE_ADDRESSES sind bekannte(!) Geräte, die den Testvorgang stören.
+     * ZB. Smartphones ohne die App: Diese haben nicht den richtigen Service mit der UUID und beim
+     * clientSocket.connect() führt es zu Service Discovery Failed.
+     */
+    public static Set<String> BANNED_DEVICE_ADDRESSES = new HashSet<String>(Arrays.asList(new String[]{"18:CF:5E:3D:D5:9B"}));
+
     //pairedDevices sind nicht die eientlich verbunden geräte. es können auch geräte sein, die früher schon mal
     //verbunden waren.
     private Set<BluetoothDevice> pairedDevices = null;
     private String myBT_ADDR = "";
 
     /**
-     *  Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet.
-     *
+     * Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet.
      */
     private Set<Connection> connections = new HashSet<Connection>(Controller.MAX_NUMBER_OF_DEVICES);
 
@@ -79,16 +87,59 @@ public class BluetoothModel extends Observable {
         notifyObservers();
     }
 
-    public void removeConnection(Connection connection) {
-        Log.d(TAG, "removeConnection");
-        if (!connections.remove(connection)) {
-            Log.d(TAG, "connection nicht entfernt");
+    /**
+     * Überprüft, ob schon eine Verbindung zu einem Gerät besteht.
+     *
+     * @param deciveMac String Device Address
+     * @return
+     */
+    public boolean isDeviceAlreadyConnected(String deciveMac) {
+        Log.d(TAG, "isDeviceAlreadyConnected: " + deciveMac + "...");
+        //Kein Gerät verbunden -> Gerät darf sich verbinden.
+        if (connections.isEmpty()) {
+            Log.d(TAG, "..device not connected");
+            return false;
         }
+        for (Connection c : connections) {
+            if (c.getDeviceAddress().equals(deciveMac)) {
+                Log.d(TAG, "..device connected");
+                return true;
+            }
+        }
+        Log.d(TAG, "..device not connected");
+        return false;
     }
 
-    public Set<Connection> getConnections(){
+    public Set<Connection> getConnections() {
         Log.d(TAG, "getConnections");
         return connections;
+    }
+
+    /**
+     * Entfernt die Verbindung mit der zugehörigen Connectin ID.
+     * Die Funktion geht davon aus, das nur eine Verbindung pro Gerät besteht.
+     *
+     * @param connectionID long Connection Id der geschlossenen Verbindung.
+     * @return
+     */
+    public boolean removeConnection(long connectionID) {
+        Log.d(TAG, "removeConnection");
+        if (connections.isEmpty()) {
+            Log.d(TAG, "connection set is empty!");
+            return true;
+        }
+        //find the connection with the thread id and update the observer.
+        for (Connection c : connections) {
+            if (c.getConnectionID() == connectionID) {
+                Log.d(TAG, "connectionID " + connectionID + " removed");
+                connections.remove(c);
+                notifyObservers();
+                return true;
+            }
+        }
+
+
+        return false;
     }
 
     /**
