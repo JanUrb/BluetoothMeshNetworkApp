@@ -160,45 +160,10 @@ public class Controller extends StateMachine {
 
         if (inputSmMessage == SmMessage.SEND_MESSAGE) {
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
-            String btAddress = (String) message.obj;
-            Message sendMessage = null;
-            //TODO: in Methode auslagern!
-            //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
-            if (!BluetoothAdapter.checkBluetoothAddress(btAddress)) {
-                //Error TODO: Throw Exception
-                Log.d(TAG, "mac addresse nicht valid");
-                //testing... TODO: Entfernen!!
-                btAddress = ((Connection) bt_model.getConnections().toArray()[0]).getDeviceAddress();
-                sendMessage = new Message(mBluetoothAdapter.getAddress(), btAddress);
-            }
-            //überprüfe ob die BT Adresse direkt zu erreichen ist.
-            boolean directlyConnected = false;
-            Connection directConnection = null;
-            for (Connection connection : bt_model.getConnections()) {
-                if (connection.getDeviceAddress().equals(btAddress)) {
-                    directlyConnected = true;
-                    directConnection = connection;
-                    break; //das Gerät wurde schon gefunden -> keine Suche mehr nötig.
-                }
-            }
-
-            //senden der Nachricht TODO: Nachrichten Klasse erstellen mit ID und TargetMac
-            if (directlyConnected) {
-                try {
-                    directConnection.write(sendMessage);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Log.d(TAG, "IOException directlyConnected " + e.getMessage());
-                }
-            } else {
-                for (Connection connection : bt_model.getConnections()) {
-                    try {
-                        connection.write(sendMessage);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        Log.d(TAG, "IOException Indirectly Connected " + e.getMessage());
-                    }
-                }
+            try {
+                sendDeviceToDeviceMessage(message);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
 
         }
@@ -306,6 +271,8 @@ public class Controller extends StateMachine {
                     /*
                     Versuche Discovery für ~12 secs. Wenn erfolgreich, nehme den Server-Socket des Device und
                     erstelle einen RFComm-Socket und initiatiere mit connect().
+
+                    Die Discovery Zeit hängt von dem jeweiligen Gerät ab. Zb. hat eins meiner Testgeräte nur ~5sec.
                      */
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
@@ -362,9 +329,6 @@ public class Controller extends StateMachine {
                         Connection connection = new Connection(mConnectedThread, btDevice);
                         connection.start();
                         bt_model.addConnection(connection);
-                        //TODO Connection Class verwenden
-//                        mUiListener.onControllerServerInfo(true);
-//                        mUiListener.onControllerConnectInfo("Connected");
                         state = State.THREAD_CONNECTED;
                         sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
                         break;
@@ -376,7 +340,6 @@ public class Controller extends StateMachine {
                         Connection clientConnection = new Connection(mConnectedThread, ((BluetoothSocket) message.obj).getRemoteDevice());
                         clientConnection.start();
                         bt_model.addConnection(clientConnection);
-                        //TODO Connection Class verwenden
                         state = State.THREAD_CONNECTED;
                         sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
                         break;
@@ -406,15 +369,6 @@ public class Controller extends StateMachine {
                         break;
 
 
-                    //bei uns gibt es mehrere CT. Hier muss gefiltert werden, ob die Nachricht an mich
-                    //gesendet werden soll.
-                    //TODO RM
-//                    case CT_RECEIVED:
-//                        String str = new String((byte[]) message.obj, 0, message.arg1);
-//                        bt_model.setMessageReceivedFrom(str);
-//
-//                        //mUiListener.onControllerReceived( str );
-//                        break;
 
                     //Das verbundene Gerät aus dem Geräte speicher löschen. ? Einfach mit boundDevices(?) im
                     case CT_CONNECTION_CLOSED:
@@ -433,6 +387,55 @@ public class Controller extends StateMachine {
                 Log.v(TAG, "STATE: " + state + " INPUT: " + inputSmMessage);
         }
         Log.i(TAG, "SM: new State: " + state);
+    }
+
+    private void sendDeviceToDeviceMessage(android.os.Message message) throws Exception {
+        String btAddress = (String) message.obj;
+        Message sendMessage = null;
+        //TODO: in Methode auslagern!
+        //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
+        if (!BluetoothAdapter.checkBluetoothAddress(btAddress)) {
+
+            Log.d(TAG, "mac addresse nicht valid");
+            //testing... TODO: Entfernen!!
+
+            btAddress = ((Connection) bt_model.getConnections().toArray()[0]).getDeviceAddress();
+            sendMessage = new Message(mBluetoothAdapter.getAddress(), btAddress);
+//            throw new Exception("Bluetooth address not valid"); TODO Einkommentieren
+
+
+
+        }
+        //überprüfe ob die BT Adresse direkt zu erreichen ist.
+        boolean directlyConnected = false;
+        Connection directConnection = null;
+        for (Connection connection : bt_model.getConnections()) {
+            if (connection.getDeviceAddress().equals(btAddress)) {
+                directlyConnected = true;
+                directConnection = connection;
+                break; //das Gerät wurde schon gefunden -> keine Suche mehr nötig.
+            }
+        }
+
+        if (directlyConnected) {
+            try {
+                directConnection.write(sendMessage);
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.d(TAG, "IOException directlyConnected " + e.getMessage());
+                throw new Exception("Sending via directly connected device failed");
+            }
+        } else {
+            for (Connection connection : bt_model.getConnections()) {
+                try {
+                    connection.write(sendMessage);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    Log.d(TAG, "IOException Indirectly Connected " + e.getMessage());
+                    throw new Exception("Sending via non-directly connected devices failed");
+                }
+            }
+        }
     }
 
     //TODO Rename!!

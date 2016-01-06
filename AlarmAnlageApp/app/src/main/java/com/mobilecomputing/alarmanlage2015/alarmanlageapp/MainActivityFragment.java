@@ -116,8 +116,7 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         }
         if(bt_model.getCurrentMessage() != null){
             Message currentMsg = bt_model.getCurrentMessage();
-            String txt = "SRC: "+currentMsg.getMessageSourceMac() + " DEST: "+currentMsg.getMessageTargetMac()
-                    +" ID: "+currentMsg.getMessageId();
+            String txt = "SRC: "+currentMsg.getMessageSourceMac() +" ID: "+currentMsg.getMessageId();
             received_message.setText(txt);
         }
         if( bt_model.getConnections() != null && !bt_model.getConnections().isEmpty()){
