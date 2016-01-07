@@ -38,8 +38,6 @@ public class BluetoothModel extends Observable {
     /**
      * Speichert die eingegangenen Nachrichten.
      */
-    private Set<Message> receivedMessages = new HashSet<Message>();
-
     private Message currentMessage = null;
 
     public BluetoothModel() {
@@ -49,11 +47,6 @@ public class BluetoothModel extends Observable {
 
     //Setter
 
-    public void setPairedDevices(Set<BluetoothDevice> bt_devices) {
-        Log.d(TAG, "setPairedDevices()");
-        pairedDevices = bt_devices;
-        notifyObservers();
-    }
 
     public void setMyBT_ADDR(String bt_addr) {
         Log.d(TAG, "setMyBT_ADDR");
@@ -79,6 +72,11 @@ public class BluetoothModel extends Observable {
 
     public Message getCurrentMessage() {
         return currentMessage;
+    }
+
+    public int getNumberOfConnections(){
+        Log.d(TAG, "getNumberOfConnections: "+connections.size());
+        return connections.size();
     }
 
     public void addConnection(Connection connection) {

@@ -18,7 +18,7 @@ import fllog.Log;
 /**
  * Created by Jan Urbansky on 19.12.2015.
  */
-public class MainActivityFragment extends Fragment implements Controller.OnControllerInteractionListener, Observer{
+public class MainActivityFragment extends Fragment implements Observer{
     private static final String TAG = "fhflMainActFragment";
 
     private BluetoothModel bt_model;
@@ -102,12 +102,6 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
     }
 
 
-
-    @Override
-    public void onControllerReceived(String str) {
-        Log.d(TAG, "onControllerReceived");
-        received_message.setText(str);
-    }
 
     @Override
     public void update(Observable observable, Object data) {

@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
 
         initBroadcastReceiver();
 
-        controller.init(this, mainFrag, bt_model);
+        controller.init(this, bt_model);
 
 
 //        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);

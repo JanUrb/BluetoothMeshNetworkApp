@@ -1,12 +1,10 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Activity;
-import android.app.Fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,11 +21,14 @@ import fllog.Log;
 public class Controller extends StateMachine {
 
     private static final String TAG = "fhflController";
-    private MainActivityFragment mainFragment = null;
     private Activity mActivity = null;
     private BluetoothModel bt_model;
-    private MessageStorage messageStorage= null;
-
+    private MessageStorage messageStorage = null;
+    /**
+     * Gibt an, ob die max Anzahl der Geräte erreicht wurde. Wird in MAX_THREAD_NUMBER und in
+     * START_NEW_CONNECTION_CYCLE gesetzt
+     */
+    private boolean maxNumberOfDevicesReached = false;
     /**
      * Serverthread
      */
@@ -46,8 +47,12 @@ public class Controller extends StateMachine {
     // Hier (0x1101 => Serial Port Profile + Base_UUID)
     public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
-    public static final int MAX_NUMBER_OF_DEVICES = 7;
-    private static final String mServiceName = "SerialPort";    //"KT-Service";
+    /**
+     * Gibt die Maximale Anzahl der verbundenen Geräte an (7 laut Bt-Standard).
+     */
+    /*package*/ static final int MAX_NUMBER_OF_DEVICES = 7;
+
+    private static final String mServiceName = "BluetoothMesh";    //"KT-Service";
 
     //wird in der Activity abgefangen
     public static final int REQUEST_ENABLE_BT = 1;
@@ -57,8 +62,8 @@ public class Controller extends StateMachine {
 
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
-        UI_START_SERVER, UI_STOP_SERVER, SEND_MESSAGE,       // from UI
-        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, CONNECT_TO_DEVICE, READ_PAIRED_DEVICES,
+        SEND_MESSAGE,       // from UI
+        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, INIT_FINISHED,
         // Bluetooth Initiation
         CO_INIT,                                        // to Controller
         //Try connecting
@@ -82,28 +87,25 @@ public class Controller extends StateMachine {
         messageStorage = new MessageStorage();
     }
 
-    public void init(Activity a, MainActivityFragment frag, BluetoothModel bt_model) {
+    public void init(Activity a, BluetoothModel bt_model) {
         Log.d(TAG, "init()");
 
         mActivity = a;
         this.bt_model = bt_model;
-
-        // init InterfaceListener
-        try {
-            mainFragment =  frag;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(frag.toString()
-                    + " must implement OnFragmentInteractionListener !!!!!!! ");
-        }
 
         // send message for start transition
         sendSmMessage(SmMessage.CO_INIT.ordinal(), 0, 0, null);
     }
 
     /**
-     * the statemachine
+     * Die Statemachine
      * <p/>
-     * call it only via sendSmMessage()
+     * Für diese App wurde die Statemachine in zwei Teile unterteilt.
+     * Anfangs werden alle SmMessage abgefangen, die von Threads kommen. Diese sind ausgelagert, da
+     * sie nicht an einen State gebunden sind.
+     * <p/>
+     * In der eigentlichen Statemachine wird die Initialisation von Bluetooth, der Verbindungsaufbau
+     * und das Überwachen der Anzahl der Verbindungen abgebildet.
      *
      * @param message
      */
@@ -142,11 +144,12 @@ public class Controller extends StateMachine {
             return;
         }
 
-
+        //Sende eine Nachricht: Aufruf kommt entweder von der GUI oder vom Empfangen einer
+        //Nachricht, die nicht an dieses Gerät gerichtet ist (routing).
         if (inputSmMessage == SmMessage.SEND_MESSAGE) {
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
             try {
-                String  target_mac = ((String) message.obj).toUpperCase();
+                String target_mac = ((String) message.obj).toUpperCase();
                 sendMessageToDevice(new Message(mBluetoothAdapter.getAddress(), target_mac));
             } catch (Exception e) {
                 Log.d(TAG, "Sending message failed!!");
@@ -155,12 +158,19 @@ public class Controller extends StateMachine {
 
         }
 
-        if(inputSmMessage == SmMessage.CT_CONNECTION_CLOSED){
-            long connectionID = (Long)message.obj; //long als Objekt, wie int -> Integer
-            Log.d(TAG, "CT_CONNECTION_CLOSED ID: "+ connectionID);
-            if(!bt_model.removeConnection(connectionID)){
-                Log.d(TAG, "connection not found.."); //TODO: Toast.
-            };
+        if (inputSmMessage == SmMessage.CT_CONNECTION_CLOSED) {
+            long connectionID = (Long) message.obj; //long als Objekt, wie int -> Integer
+            Log.d(TAG, "CT_CONNECTION_CLOSED ID: " + connectionID);
+            if (!bt_model.removeConnection(connectionID)) {
+                Log.d(TAG, "connection not found..");
+            }
+            //wenn dies der Fall ist, befindet sich die StateMachine in MAX_NUMBER_OF_DEVICES
+            // und es gibt keinen nuene Connection Cycle. Deswegen wird hier ein neuer angestossen.
+            if(state == State.THREAD_CONNECTED && maxNumberOfDevicesReached){
+                Log.d(TAG, "");
+                sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
+            }
+
 
         }
 
@@ -178,9 +188,6 @@ public class Controller extends StateMachine {
                 switch (inputSmMessage) {
                     case CO_INIT:
                         Log.v(TAG, "in Init");
-
-//                        mainFragment.onControllerConnectInfo("INIT_BT"); //kann raus
-
                         state = State.INIT_BT;
                         sendSmMessage(SmMessage.ENABLE_BT.ordinal(), 0, 0, null);
                         break;
@@ -198,8 +205,6 @@ public class Controller extends StateMachine {
                         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                         if (mBluetoothAdapter == null) {
                             Log.d(TAG, "Error: Device does not support Bluetooth !!!");
-//                            mainFragment.onControllerServerInfo(false);
-
                             state = State.INIT_BT; //fallback in init_bt state
                             break;
                         }
@@ -230,25 +235,12 @@ public class Controller extends StateMachine {
 
                         break;
 
-
-                    //unnötig für die funktion der app... TODO DELETE
-                    case READ_PAIRED_DEVICES:
-//                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-//                        Log.d(TAG, "paired devices:");
-//                        if (pairedDevices.size() > 0) {
-//                            bt_model.setPairedDevices(pairedDevices);
-//                            for (BluetoothDevice device : pairedDevices) {
-//                                Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
-//                            }
-//                        }
-
+                    case INIT_FINISHED:
                         state = State.WAIT_FOR_CONNECT;
                         sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
 
-                        break;
-
-                    //Dieser State wird benutzt, um die App so lange anzuhalten, bis ein Intent erfolgreich
-                    //zurück geschrieben hat.
+                        //Dieser State wird benutzt, um die App so lange anzuhalten, bis ein Intent erfolgreich
+                        //zurück geschrieben hat.
                     case WAIT_FOR_INTENT:
                         break;
 
@@ -273,7 +265,7 @@ public class Controller extends StateMachine {
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
                         //siehe BroadcastReceiver und Filter in der MainActivity
-                        if(mBluetoothAdapter.isDiscovering()){
+                        if (mBluetoothAdapter.isDiscovering()) {
                             Log.d(TAG, "already discovering");
                         }
                         if (!mBluetoothAdapter.startDiscovery()) {
@@ -312,8 +304,6 @@ public class Controller extends StateMachine {
                         ServerTimerThread timerThread = new ServerTimerThread(mAcceptThread, this);
                         mAcceptThread.start();
                         timerThread.start();
-//                        mainFragment.onControllerServerInfo(true);
-//                        mainFragment.onControllerConnectInfo("Wait for connect\nattempt");
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
@@ -358,14 +348,24 @@ public class Controller extends StateMachine {
 
                     case START_NEW_CONNECTION_CYCLE:
                         //teste ob die MAX_NUM_CONNECTION_THREADS erreicht wurde.
-                        state = State.WAIT_FOR_CONNECT;
-                        sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
+                        if (bt_model.getNumberOfConnections() < MAX_NUMBER_OF_DEVICES) {
+                            maxNumberOfDevicesReached = false;
+                            state = State.WAIT_FOR_CONNECT;
+                            sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
+                        } else {
+                            sendSmMessage(SmMessage.MAX_THREAD_NUMBER.ordinal(), 0, 0, null);
+                        }
                         break;
 
 
-                    //warte auf das beenden eines ConnectedThreads
+                    /*
+                    Wenn dieser State erreicht wurde, wird kein Verbindungsaufbau versucht, da dieser,
+                    abgesehen vom ersten Connection Cycle, immer über START_NEW_CONNECTION_CYCLE aus-
+                    gelöst wird
+                    warte auf das beenden eines ConnectedThreads
+                    */
                     case MAX_THREAD_NUMBER:
-
+                        maxNumberOfDevicesReached = true;
                         state = State.THREAD_CONNECTED;
                         break;
 
@@ -381,6 +381,7 @@ public class Controller extends StateMachine {
     /**
      * Liest eine eingegangen Nachricht von einem anderen Gerät, liest diese und gibt sie an senden weiter,
      * wenn sie nicht an dieses Gerät gerichtet ist.
+     *
      * @param message
      */
     private void readReceivedMessageAndRoute(android.os.Message message) {
@@ -395,24 +396,23 @@ public class Controller extends StateMachine {
             receivedMsg = (Message) o.readObject();
             Log.d(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
             //Routen der Nachricht
-            if(messageStorage.checkMessage(receivedMsg)){
+            if (messageStorage.checkMessage(receivedMsg)) {
                 Log.d(TAG, "nachricht schon erhalten");
                 //nachricht wurde erhalten -> ignorieren
-            }else{
+            } else {
                 //nachricht ist an mich gerichtet
-                Log.d(TAG, "Message routing \n Target: "+receivedMsg.getMessageTargetMac() +
-                        "\nMy_Addr: "+mBluetoothAdapter.getAddress());
-                if(receivedMsg.getMessageTargetMac().equals(mBluetoothAdapter.getAddress())){
+                Log.d(TAG, "Message routing \n Target: " + receivedMsg.getMessageTargetMac() +
+                        "\nMy_Addr: " + mBluetoothAdapter.getAddress());
+                if (receivedMsg.getMessageTargetMac().equals(mBluetoothAdapter.getAddress())) {
                     Log.d(TAG, "message an mich gerichtet");
                     bt_model.setCurrentMessage(receivedMsg);
                 }
                 //nachricht nicht an mich gerichtet -> an senden weiter geben
-                else{
+                else {
                     Log.d(TAG, "message nicht an mich gerichtet");
                     sendMessageToDevice(receivedMsg);
                 }
             }
-
 
 
         } catch (IOException e) {
@@ -423,19 +423,17 @@ public class Controller extends StateMachine {
             Log.d(TAG, "SmMessage.CT_RECEIVED ClassNotFound: " + e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d(TAG, "SmMessage.CT_RECEIVED sendMessageToDevice: "+e.getMessage());
+            Log.d(TAG, "SmMessage.CT_RECEIVED sendMessageToDevice: " + e.getMessage());
         }
     }
 
 
     /**
      * Sendet eine Nachricht an eine Adresse.
-     *
+     * <p/>
      * Zuerst wird überprüft, ob die TargetAddress eine valide Mac-Adresse ist.
      * Wenn die Adresse direkt verbunden ist, wird sie dort hingeschickt. Wenn sie nicht bekannt ist,
      * wird sie an alle geschickt.
-     *
-     *
      *
      * @param msg Message
      * @throws Exception
@@ -446,8 +444,8 @@ public class Controller extends StateMachine {
 
         //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
         if (!BluetoothAdapter.checkBluetoothAddress(btAddress)) {
-            Log.d(TAG, "mac addresse nicht valid: "+btAddress);
-            Log.d(TAG, "übergebene Mac: "+msg.getMessageTargetMac());
+            Log.d(TAG, "mac addresse nicht valid: " + btAddress);
+            Log.d(TAG, "übergebene Mac: " + msg.getMessageTargetMac());
             throw new Exception("Bluetooth address not valid");
         }
 
@@ -495,7 +493,7 @@ public class Controller extends StateMachine {
 
     public void discoverabilityEnabled() {
         Log.d(TAG, "discoverabilityEnabled()");
-        sendSmMessage(SmMessage.READ_PAIRED_DEVICES.ordinal(), 0, 0, null);
+        sendSmMessage(SmMessage.INIT_FINISHED.ordinal(), 0, 0, null);
     }
 
     public void startClientThread(BluetoothDevice bluetoothDevice) {

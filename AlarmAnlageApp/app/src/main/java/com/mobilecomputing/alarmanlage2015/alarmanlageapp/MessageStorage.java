@@ -39,6 +39,7 @@ public class MessageStorage {
     }
 
     private void addMessageWithTimestamp(Message message){
+        Log.d(TAG, "addMessageWithTimestamp");
         storeContainerSet.add(new MessageStoreContainer(message, System.currentTimeMillis()));
     }
 
