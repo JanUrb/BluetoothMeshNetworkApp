@@ -10,12 +10,8 @@ import android.util.Log;
  * 0 u. 5000 ms.
  * Dadurch wird verhindert, dass ein Deadlock ensteht, bei dem nur Server oder nur Client
  * Modus eingeschaltet ist.
- *
+ * <p/>
  * Wenn ein Serverthread mit cancel beendet wird, fordert der ServerTimer einen neuen ClientThread an.
- *
- *
- *
- * Das Logging ist mit android.util.Log TODO!!
  */
 public class ServerTimerThread extends Thread {
     public static final String TAG = "fhflServerTimer";
@@ -35,9 +31,10 @@ public class ServerTimerThread extends Thread {
 
 
     public ServerTimerThread(ServerThread serverThread, Controller controller) {
-        Log.d(TAG, "ServerTimerThread()");
+
         this.serverThread = serverThread;
         mController = controller;
+        debugOut("ServerTimerThread()");
         runtime = calculateRuntime();
     }
 
@@ -49,25 +46,22 @@ public class ServerTimerThread extends Thread {
             sleep(runtime);
             Log.d(TAG, "Attempting to cancel..");
             if (serverThread != null && serverThread.isAlive()) {
-                Log.d(TAG, "serverThread wird gecancelt.");
+                debugOut("serverThread wird gecancelt.");
                 serverThread.cancel();
-                Log.d(TAG, "sende FIND_DEVICE an controller");
-                mController.sendSmMessageWithoutLog(Controller.SmMessage.FIND_DEVICE.ordinal(),0,0,null);
+                debugOut("sende FIND_DEVICE an controller");
+                //siehe Doku sendSmMessageWithoutLog
+                mController.sendSmMessageWithoutLog(Controller.SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
             }
 
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Log.d(TAG, "InterruptedException: " + e.getMessage());
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            Log.d(TAG, "Exception: " + e.getMessage());
+            debugOut("InterruptedException: " + e.getMessage());
         }
-        Log.d(TAG, "ServerTimerThread finished");
+        debugOut("ServerTimerThread finished");
     }
 
     private long calculateRuntime() {
         long add_time = (long) (Math.random() * MAX_ADD_TIME);
-        Log.d(TAG, "calculateRuntime(): " + (RUN_TIME + add_time) + " add_time: " + add_time);
         debugOut("calculateRuntime(): " + (RUN_TIME + add_time) + " add_time: " + add_time);
         return RUN_TIME + add_time;
     }

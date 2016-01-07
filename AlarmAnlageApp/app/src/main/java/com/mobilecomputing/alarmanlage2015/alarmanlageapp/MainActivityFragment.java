@@ -18,12 +18,11 @@ import fllog.Log;
 /**
  * Created by Jan Urbansky on 19.12.2015.
  */
-public class MainActivityFragment extends Fragment implements Observer{
+public class MainActivityFragment extends Fragment implements Observer {
     private static final String TAG = "fhflMainActFragment";
 
     private BluetoothModel bt_model;
     private Controller controller;
-
 
 
     /**
@@ -49,6 +48,7 @@ public class MainActivityFragment extends Fragment implements Observer{
      * Stellt eine empfangene Nachricht dar.
      */
     private TextView received_message;
+
     /**
      * Konstruktor
      */
@@ -93,46 +93,43 @@ public class MainActivityFragment extends Fragment implements Observer{
 
 
     public void setController(Controller controller) {
+        Log.d(TAG, "setController");
         this.controller = controller;
     }
 
-    public void setBt_model(BluetoothModel bt_model){
+    public void setBt_model(BluetoothModel bt_model) {
+        Log.d(TAG, "setBt_model");
         this.bt_model = bt_model;
         this.bt_model.addObserver(this);
     }
 
 
-
     @Override
     public void update(Observable observable, Object data) {
         Log.d(TAG, "update");
-        //ignoriere null oder  leere Werte
-        if(bt_model.getPairedDevices() != null){
-            StringBuilder str = new StringBuilder();
-            for(BluetoothDevice device:bt_model.getPairedDevices()){
-                str.append(device.getAddress()+"\n");
-            }
-//            device_list.setText(str.toString()); TODO: Entfernen.
-        }
-        if(!bt_model.getMyBT_ADDR().isEmpty()){
+
+        //my_bt_addr
+        if (!bt_model.getMyBT_ADDR().isEmpty()) {
             my_bt_addr.setText(bt_model.getMyBT_ADDR());
         }
-        if(bt_model.getCurrentMessage() != null){
+
+        //received_message
+        if (bt_model.getCurrentMessage() != null) {
             Message currentMsg = bt_model.getCurrentMessage();
-            String txt = "SRC: "+currentMsg.getMessageSourceMac();
+            String txt = "SRC: " + currentMsg.getMessageSourceMac();
             received_message.setText(txt);
         }
-        if( bt_model.getConnections() != null){
+
+        //device_list
+        if (bt_model.getConnections() != null) {
             StringBuilder str = new StringBuilder();
-            if(!bt_model.getConnections().isEmpty()){
-                for(Connection connection:bt_model.getConnections()){
+            if (!bt_model.getConnections().isEmpty()) {
+                for (Connection connection : bt_model.getConnections()) {
                     str.append(connection.getDeviceAddress() + "\n");
                 }
-            }else{
+            } else {
                 str.append("No connected devices");
             }
-
-
             device_list.setText(str.toString());
         }
     }

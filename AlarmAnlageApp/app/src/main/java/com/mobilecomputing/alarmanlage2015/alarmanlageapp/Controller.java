@@ -62,16 +62,14 @@ public class Controller extends StateMachine {
 
     //TODO: UI_States entfernen und neue hinzufügen.
     public enum SmMessage {
+        CO_INIT,  //Controller
         SEND_MESSAGE,       // from UI
-        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, INIT_FINISHED,
-        // Bluetooth Initiation
-        CO_INIT,                                        // to Controller
-        //Try connecting
-        FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT,
-        //THREAD_CONNECTED
-        MAX_THREAD_NUMBER, START_NEW_CONNECTION_CYCLE,
-        AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, AT_DEBUG_SERVER, AT_DEBUG_TIMER,          // from ServerThread
-        CT_RECEIVED, CT_CONNECTION_CLOSED, AT_DEBUG_CLIENT, CT_DEBUG     // from ConnectedThread
+        ENABLE_BT, ENABLE_DISCOVERABILITY, WAIT_FOR_INTENT, INIT_FINISHED, // Bluetooth Initiation
+        FIND_DEVICE, CONNECT_AS_SERVER, CONNECT_AS_CLIENT, //WAITING FOR CONNECT
+        MAX_THREAD_NUMBER, START_NEW_CONNECTION_CYCLE, //THREAD_CONNECTED State
+        AT_MANAGE_CONNECTED_SOCKET_AS_SERVER, AT_MANAGE_CONNECTED_SOCKET_AS_CLIENT, //Verbindungsaufbau von Server/Client
+        AT_DEBUG_SERVER, AT_DEBUG_TIMER, AT_DEBUG_CLIENT, CT_DEBUG,        //Debug Ausgaben der Threads
+        CT_RECEIVED, CT_CONNECTION_CLOSED     // from ConnectedThread
     }
 
     private enum State {
@@ -138,6 +136,7 @@ public class Controller extends StateMachine {
             return;
         }
 
+        //Eine Verbindung hat eine Nachricht erhalten.
         if (inputSmMessage == SmMessage.CT_RECEIVED) {
             Log.d(TAG, "inputSmMessage == SmMessage.CT_RECEIVED");
             readReceivedMessageAndRoute(message);
@@ -158,6 +157,7 @@ public class Controller extends StateMachine {
 
         }
 
+        //Eine Verbindung wurde geschlossen.
         if (inputSmMessage == SmMessage.CT_CONNECTION_CLOSED) {
             long connectionID = (Long) message.obj; //long als Objekt, wie int -> Integer
             Log.d(TAG, "CT_CONNECTION_CLOSED ID: " + connectionID);
@@ -216,7 +216,7 @@ public class Controller extends StateMachine {
                         if (!mBluetoothAdapter.isEnabled()) {
                             Log.d(TAG, "Try to enable Bluetooth.");
                             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                            mActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+                            mActivity.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT); //siehe onActivityResult in MainActivity
                             //warte auf den Intent
                             sendSmMessage(SmMessage.WAIT_FOR_INTENT.ordinal(), 0, 0, null);
 
@@ -230,9 +230,8 @@ public class Controller extends StateMachine {
                         //das Gerät sichtbar schalten
                         Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
                         discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 0); //0 bedeutet, dass das Gerät immer sichtbar ist.
-                        mActivity.startActivityForResult(discoverableIntent, REQUEST_ENABLE_DISCO);
+                        mActivity.startActivityForResult(discoverableIntent, REQUEST_ENABLE_DISCO);//siehe onActivityResult in MainActivity
                         sendSmMessage(SmMessage.WAIT_FOR_INTENT.ordinal(), 0, 0, null);
-
                         break;
 
                     case INIT_FINISHED:
@@ -264,10 +263,11 @@ public class Controller extends StateMachine {
                      */
                     case FIND_DEVICE:
                         Log.d(TAG, "suche devices");
-                        //siehe BroadcastReceiver und Filter in der MainActivity
+
                         if (mBluetoothAdapter.isDiscovering()) {
                             Log.d(TAG, "already discovering");
                         }
+                        //siehe BroadcastReceiver und Filter in der MainActivity
                         if (!mBluetoothAdapter.startDiscovery()) {
                             Log.d(TAG, "discovery not starting...");
                             //starte einen server
@@ -397,8 +397,8 @@ public class Controller extends StateMachine {
             Log.d(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
             //Routen der Nachricht
             if (messageStorage.checkMessage(receivedMsg)) {
-                Log.d(TAG, "nachricht schon erhalten");
-                //nachricht wurde erhalten -> ignorieren
+                Log.d(TAG, "nachricht schon erhalten"); //nachricht wurde erhalten -> ignorieren
+
             } else {
                 //nachricht ist an mich gerichtet
                 Log.d(TAG, "Message routing \n Target: " + receivedMsg.getMessageTargetMac() +
@@ -507,7 +507,6 @@ public class Controller extends StateMachine {
     }
 
     public interface OnControllerInteractionListener {
-        //TODO: Parameter in MessageObj ändern.
         public void onControllerReceived(String str);
     }
 

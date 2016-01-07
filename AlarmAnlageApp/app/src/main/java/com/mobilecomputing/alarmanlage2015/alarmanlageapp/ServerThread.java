@@ -29,14 +29,11 @@ public class ServerThread extends Thread {
      * @param serviceName String
      */
     public ServerThread(BluetoothAdapter btAdapter, Controller controller, String serviceName) {
-
-
         mBluetoothAdapter = btAdapter;
         mController = controller;
         mServiceName = serviceName;
 
         debugOut("ServerThread()");    // handler must be already initialized !!!
-
 
         if (mBluetoothAdapter == null) {
             debugOut("ServerThread(): Error: mBluetoothAdapter == null");
@@ -81,7 +78,6 @@ public class ServerThread extends Thread {
                 */
                 mController.obtainMessage(Controller.SmMessage.AT_MANAGE_CONNECTED_SOCKET_AS_SERVER.ordinal(),
                         -1, -1, socket).sendToTarget();
-
                 try {
                     mServerSocket.close();
 
@@ -107,7 +103,6 @@ public class ServerThread extends Thread {
             debugOut("cancel() ServerThread: IOException during closing socket !!!");
         }
     }
-
 
     private void debugOut(String str) {
         mController.obtainMessage(Controller.SmMessage.AT_DEBUG_SERVER.ordinal(),

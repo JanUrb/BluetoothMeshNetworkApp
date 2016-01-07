@@ -3,7 +3,6 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.bluetooth.BluetoothDevice;
 
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Observable;
@@ -25,9 +24,7 @@ public class BluetoothModel extends Observable {
      */
     public static Set<String> BANNED_DEVICE_ADDRESSES = new HashSet<String>(Arrays.asList(new String[]{"18:CF:5E:3D:D5:9B"}));
 
-    //pairedDevices sind nicht die eientlich verbunden geräte. es können auch geräte sein, die früher schon mal
-    //verbunden waren.
-    private Set<BluetoothDevice> pairedDevices = null;
+
     private String myBT_ADDR = "";
 
     /**
@@ -46,8 +43,6 @@ public class BluetoothModel extends Observable {
 
 
     //Setter
-
-
     public void setMyBT_ADDR(String bt_addr) {
         Log.d(TAG, "setMyBT_ADDR");
         myBT_ADDR = bt_addr;
@@ -60,22 +55,19 @@ public class BluetoothModel extends Observable {
         notifyObservers();
     }
 
-    //Getter
-    public Set<BluetoothDevice> getPairedDevices() {
-        return pairedDevices;
-    }
-
+    //getter
     public String getMyBT_ADDR() {
         Log.d(TAG, "getMyBT_ADDR");
         return myBT_ADDR;
     }
 
     public Message getCurrentMessage() {
+        Log.d(TAG, "getCurrentMessage()");
         return currentMessage;
     }
 
-    public int getNumberOfConnections(){
-        Log.d(TAG, "getNumberOfConnections: "+connections.size());
+    public int getNumberOfConnections() {
+        Log.d(TAG, "getNumberOfConnections: " + connections.size());
         return connections.size();
     }
 

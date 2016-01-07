@@ -55,8 +55,8 @@ public class ClientThread extends Thread {
     }
 
     /**
-     *  Versucht sich mit dem Device zu verbinden. Wenn dies fehlschlägt, wird in den ServerModus
-     *  übergegangen
+     * Versucht sich mit dem Device zu verbinden. Wenn dies fehlschlägt, wird in den ServerModus
+     * übergegangen
      */
     public void run() {
         debugOut("ClientThread.run()");
@@ -77,28 +77,19 @@ public class ClientThread extends Thread {
                     -1, -1, mmSocket).sendToTarget();
         } catch (IOException connectException) {
             connectException.printStackTrace();
-            //an dieser Stelle erhalte ich den Fehler read failed, socket might closed or timeout, read ret: -1
-            //google hat ergeben: http://stackoverflow.com/a/25647197
-            //Versionen mit denen getestet wurde: 4.1.2 (lvl 16) -> fehlgeschlagen
-            //                                    5.1.1 (lvl 22) -> erfolgreich
-            //Mit entfernen und neu verkoppeln kann das Problem (manchmal) behoben werden!
 
-            //Ein Fixversuch war über Reflection an den privaten Konstruktor der Klasse zu kommen und dort den Port einzustellen. Dies scheint der Fehlergrund zu sein.
-            // Allerdings führt das zur Fehlermeldung: Socket Operation on non-Socket.
-            //Die Argumente sind: new BluetoothSocket(BluetoothSocket.TYPE_RFCOMM, -1, true, true, this, -1,
-//        new ParcelUuid(uuid))
-//        Class[] btSocketArgs = new Class[7];
-//            btSocketArgs[0] = Integer.TYPE;
-//            btSocketArgs[1] = Integer.TYPE;
-//            btSocketArgs[2] = Boolean.TYPE;
-//            btSocketArgs[3] = Boolean.TYPE;
-//            btSocketArgs[4] = BluetoothDevice.class;
-//            btSocketArgs[5] = Integer.TYPE;
-//            btSocketArgs[6] = ParcelUuid.class;
-//
-//            Constructor<BluetoothSocket> c = BluetoothSocket.class.getDeclaredConstructor(btSocketArgs);
-//            c.setAccessible(true);
-//            tmp = (BluetoothSocket)c.newInstance(1, 1, true, true, mmDevice, -1, new ParcelUuid(Controller.MY_UUID));
+            /*
+            an dieser Stelle erhalte ich den Fehler read failed, socket might closed or timeout, read ret: -1
+            google hat ergeben: http://stackoverflow.com/a/25647197
+            In der aktuellen Version wird einfach der Server-Modus aufgerufen und später nochmal versucht
+            sich zu verbinden. Dies scheint in der Praxis gut zu funktionieren
+
+            Versionen mit denen getestet wurde:
+                4.1.2 (lvl 16) -> fehlgeschlagen
+                5.1.1 (lvl 22) -> erfolgreich
+            Mit entfernen und neu verkoppeln kann das Problem (manchmal) behoben werden!
+            */
+
 
             debugOut("ClientThread.run " + connectException.getMessage());
             Log.d(TAG, "connectingError: " + connectException.getMessage());

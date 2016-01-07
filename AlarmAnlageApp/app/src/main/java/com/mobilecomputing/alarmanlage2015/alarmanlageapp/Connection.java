@@ -3,11 +3,14 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 import android.bluetooth.BluetoothDevice;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import fllog.Log;
 
 /**
+ * Wrapperklasse für einen ConnectedThread
+ * <p/>
+ * Speichert nebem dem ConnectedThread auch das verbunden BluetoothDevice.
+ * <p/>
  * Created by Jan Urbansky on 02.01.2016.
  */
 public class Connection {
@@ -23,12 +26,12 @@ public class Connection {
         connectionID = connectedThread.getId();
     }
 
-    public void start(){
+    public void start() {
         Log.d(TAG, "start()");
         connectedThread.start();
     }
 
-    public String getDeviceAddress(){
+    public String getDeviceAddress() {
         Log.d(TAG, "getDeviceAddress");
         return bluetoothDevice.getAddress();
     }

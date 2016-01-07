@@ -8,11 +8,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by Jan Urbansky on 19.12.2015.
+ * Verwaltet eine Verbindungs
  * <p/>
  * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
+ * <p/>
+ * <p/>
+ * Created by Jan Urbansky on 19.12.2015.
  */
-public class ConnectedThread extends Thread{
+public class ConnectedThread extends Thread {
 
     public final static String TAG = "fhflConnectedThread";
     private Controller mController;
@@ -103,9 +106,6 @@ public class ConnectedThread extends Thread{
         }
     }
 
-    private void castByteToString(byte[] bytes){
-
-    }
 
     private void debugOut(String str) {
         //C-ID steht für Connecton ID und ist ist die Thread ID.

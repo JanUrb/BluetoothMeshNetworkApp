@@ -1,7 +1,26 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
-import android.app.Activity;
+/*
+* MobileComputing Projekt 2015/2016
+* Alarmanlage: Bluetooth-Netzwerk
+*
+* Diese App ist das Bluetooth-Netzwerk der Gruppe Alarmanlage.
+* Das Ziel der App ist, dass Android-Geräte autonom ein Mesh-Netzwerk aufbauen und verwalten.
+*
+* Diese App wurde alleine und ohne Hilfe von Jan Urbansky geschaffen.
+*
+*
+*
+* Starten der App:
+*
+* Bei modernen Geräten muss die App nur gestartet werden. Bei alten Geräten kann es sein, dass die App
+* abstürzt, wenn kein Bluetooth aktiviert ist.
+*
+*
+* */
 
+
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -9,9 +28,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-
-
-import com.mobilecomputing.alarmanlage2015.alarmanlageapp.communication.CommunicationModel;
 
 import fllog.Log;
 
@@ -22,12 +38,10 @@ public class MainActivity extends Activity {
     private Controller controller;
     private BluetoothModel bt_model;
     /**
-     * Empfängt
+     * Empfängt die Intents von FIND_DEVICE
      */
     private BroadcastReceiver mBroadCastReceiver;
     public static MainActivity instance = null; //?
-
-    private CommunicationModel communicator;
 
 
     @Override
@@ -56,24 +70,6 @@ public class MainActivity extends Activity {
         initBroadcastReceiver();
 
         controller.init(this, bt_model);
-
-
-//        SharedPreferences sharedPref = getPreferences(this.MODE_PRIVATE);
-//        int communicationType = sharedPref.getInt(getString(R.string.communicationtype), 0);
-//        String addInfo = sharedPref.getString(getString(R.string.communicationaddinfo), null);
-//
-//
-//        if(communicationType == 0) {
-//            // Start Settings
-//            Intent intentSettings = new Intent(this, SettingsActivity.class);
-//            this.startActivity(intentSettings);
-//        }
-//        else {
-//            // Init App
-//            communicator = new CommunicationModel();
-//            communicator.setType(communicationType, addInfo);
-//            communicator.sendMessage("Hallo was geht");
-//        }
     }
 
     /**
@@ -84,7 +80,8 @@ public class MainActivity extends Activity {
      * Es darf pro Discovery Cycle nur mit einem Gerät eine Verbindung aufgebaut werden. Dazu wird
      * die validDeviceFound Variable genutzt.
      */
-    public void initBroadcastReceiver() {
+    private void initBroadcastReceiver() {
+        Log.d(TAG, "initBroadcastReceiver");
         mBroadCastReceiver = new BroadcastReceiver() {
 
             private long startTime;
@@ -100,7 +97,7 @@ public class MainActivity extends Activity {
                     startTime = System.currentTimeMillis();
                     validDeviceFound = false;
 
-                }  else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
                     BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                     Log.d(TAG, "onReceive - device name: " + device.getName() + " Device ID: " + device.getAddress());
                     //wenn die Grenze !validDeviceFound nicht eingebaut wird, können viele Threads vom
@@ -111,9 +108,9 @@ public class MainActivity extends Activity {
                         validDeviceFound = true;
                         controller.startClientThread(device);
                     } else {
-                        Log.d(TAG, "onReceive - device already connected or cycle full: " + device.getAddress()+"\nDeviceFound: "+ validDeviceFound);
+                        Log.d(TAG, "onReceive - device already connected or cycle full: " + device.getAddress() + "\nDeviceFound: " + validDeviceFound);
                     }
-                }else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
                     Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
                     Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
                     //Wenn ein Gerät gefunden wurde übernimmt der ACTION_FOUND Zweig den Übergang in den nächsten State
