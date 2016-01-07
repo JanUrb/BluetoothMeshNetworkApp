@@ -77,6 +77,15 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
                 controller.sendSmMessage(Controller.SmMessage.SEND_MESSAGE.ordinal(), 0, 0, address);
             }
         });
+// für debugging und vorführung. Nach langem klicken wird das Feld leer gemacht.
+        received_message.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                Log.d(TAG, "address_input: onLongClick");
+                received_message.setText("No message received");
+                return true;
+            }
+        });
 
 
         return view;
@@ -116,7 +125,7 @@ public class MainActivityFragment extends Fragment implements Controller.OnContr
         }
         if(bt_model.getCurrentMessage() != null){
             Message currentMsg = bt_model.getCurrentMessage();
-            String txt = "SRC: "+currentMsg.getMessageSourceMac() +" ID: "+currentMsg.getMessageId();
+            String txt = "SRC: "+currentMsg.getMessageSourceMac();
             received_message.setText(txt);
         }
         if( bt_model.getConnections() != null){

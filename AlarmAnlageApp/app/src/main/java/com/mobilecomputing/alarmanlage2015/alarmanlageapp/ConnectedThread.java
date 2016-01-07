@@ -103,6 +103,10 @@ public class ConnectedThread extends Thread{
         }
     }
 
+    private void castByteToString(byte[] bytes){
+
+    }
+
     private void debugOut(String str) {
         //C-ID steht für Connecton ID und ist ist die Thread ID.
         str = "C-ID " + this.getId() + ": " + str;

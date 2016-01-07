@@ -6,11 +6,11 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.widget.Toast;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Set;
 import java.util.UUID;
 
 import fllog.Log;
@@ -23,9 +23,10 @@ import fllog.Log;
 public class Controller extends StateMachine {
 
     private static final String TAG = "fhflController";
-    private OnControllerInteractionListener mUiListener = null;
+    private MainActivityFragment mainFragment = null;
     private Activity mActivity = null;
     private BluetoothModel bt_model;
+    private MessageStorage messageStorage= null;
 
     /**
      * Serverthread
@@ -78,9 +79,10 @@ public class Controller extends StateMachine {
 
     public Controller() {
         Log.d(TAG, "Controller()");
+        messageStorage = new MessageStorage();
     }
 
-    public void init(Activity a, Fragment frag, BluetoothModel bt_model) {
+    public void init(Activity a, MainActivityFragment frag, BluetoothModel bt_model) {
         Log.d(TAG, "init()");
 
         mActivity = a;
@@ -88,7 +90,7 @@ public class Controller extends StateMachine {
 
         // init InterfaceListener
         try {
-            mUiListener = (OnControllerInteractionListener) frag;
+            mainFragment =  frag;
         } catch (ClassCastException e) {
             throw new ClassCastException(frag.toString()
                     + " must implement OnFragmentInteractionListener !!!!!!! ");
@@ -136,24 +138,7 @@ public class Controller extends StateMachine {
 
         if (inputSmMessage == SmMessage.CT_RECEIVED) {
             Log.d(TAG, "inputSmMessage == SmMessage.CT_RECEIVED");
-            Message receivedMsg = null;
-            byte[] bytes = (byte[]) message.obj;
-
-            //Quelle: https://stackoverflow.com/questions/5837698/converting-any-object-to-a-byte-array-in-java
-            ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-            try {
-                ObjectInputStream o = new ObjectInputStream(b);
-                receivedMsg = (Message) o.readObject();
-                Log.d(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
-                bt_model.setCurrentMessage(receivedMsg);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.d(TAG, "SmMessage.CT_RECEIVED IOError: " + e.getMessage());
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-                Log.d(TAG, "SmMessage.CT_RECEIVED ClassNotFound: " + e.getMessage());
-            }
-
+            readReceivedMessageAndRoute(message);
             return;
         }
 
@@ -161,7 +146,8 @@ public class Controller extends StateMachine {
         if (inputSmMessage == SmMessage.SEND_MESSAGE) {
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
             try {
-                sendDeviceToDeviceMessage(message);
+                String  target_mac = ((String) message.obj).toUpperCase();
+                sendMessageToDevice(new Message(mBluetoothAdapter.getAddress(), target_mac));
             } catch (Exception e) {
                 Log.d(TAG, "Sending message failed!!");
                 e.printStackTrace();
@@ -193,7 +179,7 @@ public class Controller extends StateMachine {
                     case CO_INIT:
                         Log.v(TAG, "in Init");
 
-//                        mUiListener.onControllerConnectInfo("INIT_BT"); //kann raus
+//                        mainFragment.onControllerConnectInfo("INIT_BT"); //kann raus
 
                         state = State.INIT_BT;
                         sendSmMessage(SmMessage.ENABLE_BT.ordinal(), 0, 0, null);
@@ -212,7 +198,7 @@ public class Controller extends StateMachine {
                         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
                         if (mBluetoothAdapter == null) {
                             Log.d(TAG, "Error: Device does not support Bluetooth !!!");
-//                            mUiListener.onControllerServerInfo(false);
+//                            mainFragment.onControllerServerInfo(false);
 
                             state = State.INIT_BT; //fallback in init_bt state
                             break;
@@ -247,14 +233,14 @@ public class Controller extends StateMachine {
 
                     //unnötig für die funktion der app... TODO DELETE
                     case READ_PAIRED_DEVICES:
-                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-                        Log.d(TAG, "paired devices:");
-                        if (pairedDevices.size() > 0) {
-                            bt_model.setPairedDevices(pairedDevices);
-                            for (BluetoothDevice device : pairedDevices) {
-                                Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
-                            }
-                        }
+//                        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+//                        Log.d(TAG, "paired devices:");
+//                        if (pairedDevices.size() > 0) {
+//                            bt_model.setPairedDevices(pairedDevices);
+//                            for (BluetoothDevice device : pairedDevices) {
+//                                Log.d(TAG, "   " + device.getName() + "  " + device.getAddress());
+//                            }
+//                        }
 
                         state = State.WAIT_FOR_CONNECT;
                         sendSmMessage(SmMessage.FIND_DEVICE.ordinal(), 0, 0, null);
@@ -326,8 +312,8 @@ public class Controller extends StateMachine {
                         ServerTimerThread timerThread = new ServerTimerThread(mAcceptThread, this);
                         mAcceptThread.start();
                         timerThread.start();
-//                        mUiListener.onControllerServerInfo(true);
-//                        mUiListener.onControllerConnectInfo("Wait for connect\nattempt");
+//                        mainFragment.onControllerServerInfo(true);
+//                        mainFragment.onControllerConnectInfo("Wait for connect\nattempt");
                         state = State.WAIT_FOR_CONNECT;
                         break;
 
@@ -383,18 +369,6 @@ public class Controller extends StateMachine {
                         state = State.THREAD_CONNECTED;
                         break;
 
-
-
-                    //Das verbundene Gerät aus dem Geräte speicher löschen. ? Einfach mit boundDevices(?) im
-
-                    case UI_STOP_SERVER:
-                        mConnectedThread.cancel();
-
-//                        mUiListener.onControllerServerInfo(false);
-//                        mUiListener.onControllerConnectInfo("INIT_BT");
-                        state = State.INIT_BT;
-                        break;
-
                     default:
                         Log.v(TAG, "SM: not a valid input in this state !!!!!!");
                         break;
@@ -404,23 +378,79 @@ public class Controller extends StateMachine {
         Log.i(TAG, "SM: new State: " + state);
     }
 
-    private void sendDeviceToDeviceMessage(android.os.Message message) throws Exception {
-        String btAddress = (String) message.obj;
-        Message sendMessage = null;
-        //TODO: in Methode auslagern!
+    /**
+     * Liest eine eingegangen Nachricht von einem anderen Gerät, liest diese und gibt sie an senden weiter,
+     * wenn sie nicht an dieses Gerät gerichtet ist.
+     * @param message
+     */
+    private void readReceivedMessageAndRoute(android.os.Message message) {
+        Log.d(TAG, "readReceivedMessageAndRoute");
+        Message receivedMsg = null;
+        byte[] bytes = (byte[]) message.obj;
+
+        //Quelle: https://stackoverflow.com/questions/5837698/converting-any-object-to-a-byte-array-in-java
+        ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+        try {
+            ObjectInputStream o = new ObjectInputStream(b);
+            receivedMsg = (Message) o.readObject();
+            Log.d(ConnectedThread.TAG, "MessageReceived: " + receivedMsg.getMessageId());
+            //Routen der Nachricht
+            if(messageStorage.checkMessage(receivedMsg)){
+                Log.d(TAG, "nachricht schon erhalten");
+                //nachricht wurde erhalten -> ignorieren
+            }else{
+                //nachricht ist an mich gerichtet
+                Log.d(TAG, "Message routing \n Target: "+receivedMsg.getMessageTargetMac() +
+                        "\nMy_Addr: "+mBluetoothAdapter.getAddress());
+                if(receivedMsg.getMessageTargetMac().equals(mBluetoothAdapter.getAddress())){
+                    Log.d(TAG, "message an mich gerichtet");
+                    bt_model.setCurrentMessage(receivedMsg);
+                }
+                //nachricht nicht an mich gerichtet -> an senden weiter geben
+                else{
+                    Log.d(TAG, "message nicht an mich gerichtet");
+                    sendMessageToDevice(receivedMsg);
+                }
+            }
+
+
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.d(TAG, "SmMessage.CT_RECEIVED IOError: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.d(TAG, "SmMessage.CT_RECEIVED ClassNotFound: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "SmMessage.CT_RECEIVED sendMessageToDevice: "+e.getMessage());
+        }
+    }
+
+
+    /**
+     * Sendet eine Nachricht an eine Adresse.
+     *
+     * Zuerst wird überprüft, ob die TargetAddress eine valide Mac-Adresse ist.
+     * Wenn die Adresse direkt verbunden ist, wird sie dort hingeschickt. Wenn sie nicht bekannt ist,
+     * wird sie an alle geschickt.
+     *
+     *
+     *
+     * @param msg Message
+     * @throws Exception
+     */
+    private void sendMessageToDevice(Message msg) throws Exception {
+        Log.d(TAG, "sendMessageToDevice");
+        String btAddress = msg.getMessageTargetMac();
+
         //validiere MAC TODO; Exceptions -> Fehlerausgabe als Toast(?)
         if (!BluetoothAdapter.checkBluetoothAddress(btAddress)) {
-
-            Log.d(TAG, "mac addresse nicht valid");
-            //testing... TODO: Entfernen!!
-
-            btAddress = ((Connection) bt_model.getConnections().toArray()[0]).getDeviceAddress();
-            sendMessage = new Message(mBluetoothAdapter.getAddress(), btAddress);
-//            throw new Exception("Bluetooth address not valid"); TODO Einkommentieren
-
-
-
+            Log.d(TAG, "mac addresse nicht valid: "+btAddress);
+            Log.d(TAG, "übergebene Mac: "+msg.getMessageTargetMac());
+            throw new Exception("Bluetooth address not valid");
         }
+
         //überprüfe ob die BT Adresse direkt zu erreichen ist.
         boolean directlyConnected = false;
         Connection directConnection = null;
@@ -432,18 +462,22 @@ public class Controller extends StateMachine {
             }
         }
 
+//        Kenne ich das Gerät? Ja -> sende an Gerät
         if (directlyConnected) {
+            Log.d(TAG, "sendMessageToD: directly connected");
             try {
-                directConnection.write(sendMessage);
+                directConnection.write(msg);
             } catch (IOException e) {
                 e.printStackTrace();
                 Log.d(TAG, "IOException directlyConnected " + e.getMessage());
                 throw new Exception("Sending via directly connected device failed");
             }
+//      Kenne ich das Gerät? Nein -> sende an alle
         } else {
+            Log.d(TAG, "sendMessageToD: not directly connected");
             for (Connection connection : bt_model.getConnections()) {
                 try {
-                    connection.write(sendMessage);
+                    connection.write(msg);
                 } catch (IOException e) {
                     e.printStackTrace();
                     Log.d(TAG, "IOException Indirectly Connected " + e.getMessage());
@@ -453,7 +487,7 @@ public class Controller extends StateMachine {
         }
     }
 
-    //TODO Rename!!
+
     public void bluetoothAdapterEnabled() {
         Log.d(TAG, "bluetoothAdapterEnabled");
         sendSmMessage(SmMessage.ENABLE_DISCOVERABILITY.ordinal(), 0, 0, null);
