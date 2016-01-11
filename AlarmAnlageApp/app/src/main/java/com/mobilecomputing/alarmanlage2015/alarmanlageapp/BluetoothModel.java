@@ -1,8 +1,5 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
-
-import android.bluetooth.BluetoothDevice;
-
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Observable;

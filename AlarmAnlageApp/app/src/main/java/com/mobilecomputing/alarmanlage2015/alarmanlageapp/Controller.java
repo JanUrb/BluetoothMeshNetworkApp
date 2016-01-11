@@ -15,6 +15,9 @@ import fllog.Log;
 
 /**
  * Created by Jan Urbansky on 19.12.2015.
+ *
+ * Debug REGEXP: fhfl(Server|Connected|Client|ServerTimer)Thread
+ *
  * <p/>
  * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  */
