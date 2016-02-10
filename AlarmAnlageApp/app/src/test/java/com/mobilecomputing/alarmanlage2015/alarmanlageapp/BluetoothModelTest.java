@@ -24,10 +24,6 @@ public class BluetoothModelTest {
 
     @Before
     public void setUp() throws Exception {
-        PowerMock.mockStatic(Log.class);
-        PowerMock.mockStatic(android.util.Log.class);
-        android.util.Log.d(anyString(), anyString());
-
         Log.init(false, false);
         btModel = new BluetoothModel();
     }
@@ -35,9 +31,23 @@ public class BluetoothModelTest {
     @Test
     public void testSetMyBT_ADDR() {
         btModel.setMyBT_ADDR("A1");
-
         String res = btModel.getMyBT_ADDR();
         Assert.assertEquals("A1", res);
     }
 
+
+    @Test
+    public void testIsDeviceAlreadyConnected(){
+        String deviceMac = "123123";
+        Connection connectionMock = EasyMock.createMock(Connection.class);
+        expect(connectionMock.getDeviceAddress()).andReturn(deviceMac);
+        replay(connectionMock);
+
+        btModel.addConnection(connectionMock);
+        boolean res = btModel.isDeviceAlreadyConnected(deviceMac);
+
+        Assert.assertTrue(res);
+        verify(connectionMock);
+
+    }
 }

@@ -3,3 +3,167 @@
 0 fhflBluetoothModel setMyBT_ADDR
 0 fhflBluetoothModel notifyObservers
 0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection start()
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection start()
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection start()
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection start()
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection getDeviceAddress
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel setMyBT_ADDR
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel getMyBT_ADDR
+0 fhflBluetoothModel BluetoothModel()
+0 fhflBluetoothModel addConnection
+0 fhflBluetoothModel notifyObservers
+0 fhflBluetoothModel isDeviceAlreadyConnected: 123123...
+0 fhflBluetoothModel ..device connected
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection start()
+0 fhflConnection Connection(ConnectedThread ct, BluetoothDevice btDevice)
+0 fhflConnection getDeviceAddress

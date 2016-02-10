@@ -48,7 +48,7 @@ public class MessageStorage {
     }
 
 
-    private void removeOldMessages() {
+    protected void removeOldMessages() {
         Log.d(TAG, "removeOldMessages");
         long currentTimestamp = System.currentTimeMillis();
         for (MessageStoreContainer m : storeContainerSet) {
@@ -62,7 +62,7 @@ public class MessageStorage {
      * @param message
      * @return Gibt true zurück, wenn die Nachricht in der History ist.
      */
-    private boolean checkMessageIdInHistory(Message message) {
+    protected boolean checkMessageIdInHistory(Message message) {
         Log.d(TAG, "checkMessageId");
         boolean messageAlreadyReceived = false;
         for (MessageStoreContainer m : storeContainerSet) {
