@@ -15,12 +15,20 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        UnitTests {
+            debuggable true
+        }
     }
     productFlavors {
+    }
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
+    testCompile 'org.easymock:easymock:3.4'
+    testCompile 'org.powermock:powermock-api-easymock:1.6.4'
 }
