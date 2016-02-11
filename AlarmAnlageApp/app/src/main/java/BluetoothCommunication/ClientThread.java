@@ -1,9 +1,11 @@
-package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
+package BluetoothCommunication;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
+
+import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Controller;
 
 import java.io.IOException;
 

@@ -11,6 +11,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.UUID;
 
+import BluetoothCommunication.ClientThread;
+import BluetoothCommunication.ConnectedThread;
+import BluetoothCommunication.ServerThread;
+import BluetoothCommunication.ServerTimerThread;
 import fllog.Log;
 
 /**

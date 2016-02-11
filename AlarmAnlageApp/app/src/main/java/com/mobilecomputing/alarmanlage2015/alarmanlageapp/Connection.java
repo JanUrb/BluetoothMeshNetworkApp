@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 
 import java.io.IOException;
 
+import BluetoothCommunication.ConnectedThread;
 import fllog.Log;
 
 /**

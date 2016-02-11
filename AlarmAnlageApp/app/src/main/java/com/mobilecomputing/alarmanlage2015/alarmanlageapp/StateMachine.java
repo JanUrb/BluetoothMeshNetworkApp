@@ -86,7 +86,7 @@ public class StateMachine extends Handler {
      * at fllog.Log.log(Log.java:101)
      * at fllog.Log.d(Log.java:45)
      * at com.mobilecomputing.alarmanlage2015.alarmanlageapp.StateMachine.sendSmMessageWithoutLog(StateMachine.java:63)
-     * at com.mobilecomputing.alarmanlage2015.alarmanlageapp.ServerTimerThread.run(ServerTimerThread.java:51)
+     * at BluetoothCommunication.ServerTimerThread.run(ServerTimerThread.java:51)
      *
      * Daher habe ich die Log Methode entfernt, um den ServerTimerThread die Statemachine beinflussen zu lassen.
      *
