@@ -6,6 +6,14 @@ import java.util.List;
 
 /**
  * Created by Jan Urbansky on 14.02.2016.
+ *
+ *
+ * TODO: Improvement Ideas
+ *
+ * Enable a mode that only reacts on messages directed to the client -> lowers the info overhead on
+ * the client device!
+ *
+ *
  */
 public class BluetoothCommunicator {
 

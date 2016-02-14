@@ -159,7 +159,7 @@ public class Controller extends StateMachine {
             Log.d(TAG, "StateMachine: SmMessage.SEND_MESSAGE");
             try {
                 String target_mac = ((String) message.obj).toUpperCase();
-                sendMessageToDevice(new Message(mBluetoothAdapter.getAddress(), target_mac));
+                sendMessageToDevice(new Message(mBluetoothAdapter.getAddress(), target_mac, null));
             } catch (Exception e) {
                 Log.d(TAG, "Sending message failed!!");
                 e.printStackTrace();
