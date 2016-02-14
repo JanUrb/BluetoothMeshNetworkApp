@@ -23,13 +23,16 @@ public class Message implements Serializable {
     private UUID messageId;
     private String messageTargetMac;
     private String messageSourceMac;
+    private Object content;
 
 
-    public Message(String messageSourceMac, String messageTargetMac) {
+    public Message(String messageSourceMac, String messageTargetMac, Object content) {
         Log.d(TAG, "Message()");
         this.messageSourceMac = messageSourceMac;
         this.messageTargetMac = messageTargetMac;
         messageId = UUID.randomUUID();
+
+        this.content = content;
     }
 
     public UUID getMessageId() {
@@ -45,6 +48,10 @@ public class Message implements Serializable {
     public String getMessageTargetMac() {
         Log.d(TAG, "getMessageTargetMac");
         return messageTargetMac;
+    }
+
+    public Object getContent(){
+        return content;
     }
 
     /**
