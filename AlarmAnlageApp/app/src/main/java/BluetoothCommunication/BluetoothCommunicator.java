@@ -1,9 +1,6 @@
 package BluetoothCommunication;
 
-import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-
-import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Connection;
 
 import java.util.List;
 
@@ -12,6 +9,17 @@ import java.util.List;
  */
 public class BluetoothCommunicator {
 
+
+    /**
+     * Enables Bluetooth and Discoverability.
+     */
+    public void init(){
+
+    }
+
+    /**
+     * The search for connections starts.
+     */
     public void start(){
 
     }
@@ -20,14 +28,13 @@ public class BluetoothCommunicator {
 
     }
 
-    public void setLogFragment(){
+    public void setLogFragment(ILogFragment logFragment){
 
     }
 
     public void setCommunicationEventListener(ICommunicationEvents communicationEventListener){
 
     }
-
 
     /**
      *
@@ -37,21 +44,20 @@ public class BluetoothCommunicator {
         return null;
     }
 
-    public boolean disconnectConnection(BluetoothConnection btConnection){
-        //TODO: returns true if the connection was there and was successfully disconected.
-        return false;
+    public void disconnectConnection(BluetoothConnection btConnection){
+
     }
 
-    public void sendToDevice(String uuid){
+    public void sendToDevice(String deviceMAC){
 
     }
 
     public void sendToDevice(BluetoothDevice btDevice){
-
+        sendToDevice(btDevice.getAddress());
     }
 
     public void sendToDevice(BluetoothConnection btConnection){
-
+        sendToDevice(btConnection.getDevice());
     }
 
 
