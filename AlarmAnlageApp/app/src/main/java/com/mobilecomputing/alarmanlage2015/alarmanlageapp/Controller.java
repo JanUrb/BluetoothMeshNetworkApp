@@ -13,6 +13,9 @@ import java.util.UUID;
 
 import BluetoothCommunication.ClientThread;
 import BluetoothCommunication.ConnectedThread;
+import BluetoothCommunication.Connection;
+import BluetoothCommunication.Message;
+import BluetoothCommunication.MessageStorage;
 import BluetoothCommunication.ServerThread;
 import BluetoothCommunication.ServerTimerThread;
 import fllog.Log;

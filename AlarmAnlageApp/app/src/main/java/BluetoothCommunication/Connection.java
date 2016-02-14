@@ -1,10 +1,9 @@
-package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
+package BluetoothCommunication;
 
 import android.bluetooth.BluetoothDevice;
 
 import java.io.IOException;
 
-import BluetoothCommunication.ConnectedThread;
 import fllog.Log;
 
 /**
@@ -35,6 +34,10 @@ public class Connection {
     public String getDeviceAddress() {
         Log.d(TAG, "getDeviceAddress");
         return bluetoothDevice.getAddress();
+    }
+
+    protected BluetoothDevice getBluetoothDevice(){
+        return bluetoothDevice;
     }
 
     public void write(Message msg) throws IOException {

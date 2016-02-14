@@ -1,4 +1,4 @@
-package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
+package BluetoothCommunication;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

@@ -1,7 +1,6 @@
 package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 import android.app.Fragment;
-import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +12,8 @@ import android.widget.TextView;
 import java.util.Observable;
 import java.util.Observer;
 
+import BluetoothCommunication.Connection;
+import BluetoothCommunication.Message;
 import fllog.Log;
 
 /**

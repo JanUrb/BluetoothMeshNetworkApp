@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
 
+import BluetoothCommunication.Connection;
+import BluetoothCommunication.Message;
 import fllog.Log;
 
 /**
