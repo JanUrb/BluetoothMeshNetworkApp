@@ -11,9 +11,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.UUID;
 
+import BluetoothCommunication.BluetoothConnection;
 import BluetoothCommunication.ClientThread;
 import BluetoothCommunication.ConnectedThread;
-import BluetoothCommunication.Connection;
 import BluetoothCommunication.Message;
 import BluetoothCommunication.MessageStorage;
 import BluetoothCommunication.ServerThread;
@@ -175,7 +175,7 @@ public class Controller extends StateMachine {
                 Log.d(TAG, "connection not found..");
             }
             //wenn dies der Fall ist, befindet sich die StateMachine in MAX_NUMBER_OF_DEVICES
-            // und es gibt keinen nuene Connection Cycle. Deswegen wird hier ein neuer angestossen.
+            // und es gibt keinen nuene BluetoothConnection Cycle. Deswegen wird hier ein neuer angestossen.
             if(state == State.THREAD_CONNECTED && maxNumberOfDevicesReached){
                 Log.d(TAG, "");
                 sendSmMessage(SmMessage.START_NEW_CONNECTION_CYCLE.ordinal(), 0, 0, null);
@@ -327,7 +327,7 @@ public class Controller extends StateMachine {
                         BluetoothSocket socket = (BluetoothSocket) message.obj;
                         BluetoothDevice btDevice = socket.getRemoteDevice();
                         mConnectedThread = new ConnectedThread(socket, this);
-                        Connection connection = new Connection(mConnectedThread, btDevice);
+                        BluetoothConnection connection = new BluetoothConnection(mConnectedThread, btDevice);
                         connection.start();
                         bt_model.addConnection(connection);
                         state = State.THREAD_CONNECTED;
@@ -338,7 +338,7 @@ public class Controller extends StateMachine {
                         Log.d(TAG, "manage connected Socket als Client");
                         //mClientThread.cancel();
                         mConnectedThread = new ConnectedThread((BluetoothSocket) message.obj, this);
-                        Connection clientConnection = new Connection(mConnectedThread, ((BluetoothSocket) message.obj).getRemoteDevice());
+                        BluetoothConnection clientConnection = new BluetoothConnection(mConnectedThread, ((BluetoothSocket) message.obj).getRemoteDevice());
                         clientConnection.start();
                         bt_model.addConnection(clientConnection);
                         state = State.THREAD_CONNECTED;
@@ -370,7 +370,7 @@ public class Controller extends StateMachine {
 
                     /*
                     Wenn dieser State erreicht wurde, wird kein Verbindungsaufbau versucht, da dieser,
-                    abgesehen vom ersten Connection Cycle, immer über START_NEW_CONNECTION_CYCLE aus-
+                    abgesehen vom ersten BluetoothConnection Cycle, immer über START_NEW_CONNECTION_CYCLE aus-
                     gelöst wird
                     warte auf das beenden eines ConnectedThreads
                     */
@@ -461,8 +461,8 @@ public class Controller extends StateMachine {
 
         //überprüfe ob die BT Adresse direkt zu erreichen ist.
         boolean directlyConnected = false;
-        Connection directConnection = null;
-        for (Connection connection : bt_model.getConnections()) {
+        BluetoothConnection directConnection = null;
+        for (BluetoothConnection connection : bt_model.getBluetoothConnections()) {
             if (connection.getDeviceAddress().equals(btAddress)) {
                 directlyConnected = true;
                 directConnection = connection;
@@ -483,7 +483,7 @@ public class Controller extends StateMachine {
 //      Kenne ich das Gerät? Nein -> sende an alle
         } else {
             Log.d(TAG, "sendMessageToD: not directly connected");
-            for (Connection connection : bt_model.getConnections()) {
+            for (BluetoothConnection connection : bt_model.getBluetoothConnections()) {
                 try {
                     connection.write(msg);
                 } catch (IOException e) {

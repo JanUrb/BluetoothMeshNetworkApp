@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.util.Observable;
 import java.util.Observer;
 
-import BluetoothCommunication.Connection;
+import BluetoothCommunication.BluetoothConnection;
 import BluetoothCommunication.Message;
 import fllog.Log;
 
@@ -122,10 +122,10 @@ public class MainActivityFragment extends Fragment implements Observer {
         }
 
         //device_list
-        if (bt_model.getConnections() != null) {
+        if (bt_model.getBluetoothConnections() != null) {
             StringBuilder str = new StringBuilder();
-            if (!bt_model.getConnections().isEmpty()) {
-                for (Connection connection : bt_model.getConnections()) {
+            if (!bt_model.getBluetoothConnections().isEmpty()) {
+                for (BluetoothConnection connection : bt_model.getBluetoothConnections()) {
                     str.append(connection.getDeviceAddress() + "\n");
                 }
             } else {

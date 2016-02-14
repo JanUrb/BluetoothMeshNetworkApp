@@ -17,7 +17,7 @@ import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Controller;
  * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  * Ist die Serverseite der Verbindung.
  */
-public class ServerThread extends Thread {
+public final class ServerThread extends Thread {
     public static final String TAG = "fhflServerThread";
     private BluetoothAdapter mBluetoothAdapter;
     private BluetoothServerSocket mServerSocket;
@@ -30,7 +30,7 @@ public class ServerThread extends Thread {
      * @param controller  Controller
      * @param serviceName String
      */
-    public ServerThread(BluetoothAdapter btAdapter, Controller controller, String serviceName) {
+    protected ServerThread(BluetoothAdapter btAdapter, Controller controller, String serviceName) {
         mBluetoothAdapter = btAdapter;
         mController = controller;
         mServiceName = serviceName;
@@ -97,7 +97,7 @@ public class ServerThread extends Thread {
     /**
      * Will cancel the listening socket, and cause the thread to finish
      */
-    public void cancel() {
+    protected void cancel() {
         debugOut("cancel() ServerThread");
         try {
             mServerSocket.close();

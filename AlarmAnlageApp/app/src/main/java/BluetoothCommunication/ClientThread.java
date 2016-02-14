@@ -18,7 +18,7 @@ import java.io.IOException;
  * <p/>
  * Debugging mit debugOut und android.util.Log
  */
-public class ClientThread extends Thread {
+public final class ClientThread extends Thread {
     public final static String TAG = "fhflClientThread";
     private final BluetoothSocket mmSocket;
     private final BluetoothDevice mmDevice;
@@ -26,7 +26,7 @@ public class ClientThread extends Thread {
     private Controller mController;
 
 
-    public ClientThread(BluetoothDevice device, BluetoothAdapter bluetoothAdapter,
+    protected ClientThread(BluetoothDevice device, BluetoothAdapter bluetoothAdapter,
                         Controller controller) {
 
         // Use a temporary object that is later assigned to mmSocket,

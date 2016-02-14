@@ -15,7 +15,7 @@ import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Controller;
  * <p/>
  * Wenn ein Serverthread mit cancel beendet wird, fordert der ServerTimer einen neuen ClientThread an.
  */
-public class ServerTimerThread extends Thread {
+public final class ServerTimerThread extends Thread {
     public static final String TAG = "fhflServerTimer";
     private long runtime = 0;
     private ServerThread serverThread = null;
@@ -32,7 +32,7 @@ public class ServerTimerThread extends Thread {
     private long MAX_ADD_TIME = 5000;
 
 
-    public ServerTimerThread(ServerThread serverThread, Controller controller) {
+    protected ServerTimerThread(ServerThread serverThread, Controller controller) {
 
         this.serverThread = serverThread;
         mController = controller;

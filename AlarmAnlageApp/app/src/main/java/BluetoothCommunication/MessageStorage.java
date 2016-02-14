@@ -13,13 +13,13 @@ import fllog.Log;
  * <p/>
  * Created by Jan Urbansky
  */
-public class MessageStorage {
+public final class MessageStorage {
     private static final String TAG = "fhflMessageStorage";
     private Set<MessageStoreContainer> storeContainerSet = new HashSet<MessageStoreContainer>();
     //10 secs
     private static final long TIME_LIMIT = 10000;
 
-    public MessageStorage() {
+    protected MessageStorage() {
         Log.d(TAG, "MessageStorage");
     }
 

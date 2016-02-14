@@ -17,7 +17,7 @@ import java.io.OutputStream;
  * <p/>
  * Created by Jan Urbansky on 19.12.2015.
  */
-public class ConnectedThread extends Thread {
+public final class ConnectedThread extends Thread {
 
     public final static String TAG = "fhflConnectedThread";
     private Controller mController;
@@ -30,7 +30,7 @@ public class ConnectedThread extends Thread {
      * @param socket
      * @param controller
      */
-    public ConnectedThread(BluetoothSocket socket, Controller controller) {
+    protected ConnectedThread(BluetoothSocket socket, Controller controller) {
         mSocket = socket;
         mController = controller;
         InputStream tmpIn = null;

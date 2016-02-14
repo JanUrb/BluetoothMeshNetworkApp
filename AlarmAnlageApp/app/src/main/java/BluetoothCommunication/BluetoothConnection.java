@@ -2,41 +2,52 @@ package BluetoothCommunication;
 
 import android.bluetooth.BluetoothDevice;
 
+import java.io.IOException;
+
+import fllog.Log;
+
 /**
- * Created by Jan Urbansky on 14.02.2016.
+ * Wrapperklasse für einen ConnectedThread
+ * <p/>
+ * Speichert nebem dem ConnectedThread auch das verbunden BluetoothDevice.
+ * <p/>
+ * Created by Jan Urbansky on 02.01.2016.
  */
 public final class BluetoothConnection {
-    /*TODO: Create class. It contains:
-    *       The Bluetooth Device
-    *       Some Meta Info about the connection.
-    *       Connection as private field !!
-    * */
+    private static final String TAG = "fhflConnection";
+    private ConnectedThread connectedThread;
+    private BluetoothDevice bluetoothDevice;
+    private long connectionID;
 
-
-    private Connection mActiveConnection;
-
-
-
-    /**
-     * Hidden Constructor
-     */
-    protected BluetoothConnection(Connection connection){
-        mActiveConnection = connection;
+    protected BluetoothConnection(ConnectedThread ct, BluetoothDevice btDevice) {
+        Log.d(TAG, "BluetoothConnection(ConnectedThread ct, BluetoothDevice btDevice)");
+        connectedThread = ct;
+        bluetoothDevice = btDevice;
+        connectionID = connectedThread.getId();
     }
 
-    /**
-     * Facing to the public
-     * @return
-     */
-    public BluetoothDevice getDevice() {
-        return mActiveConnection.getBluetoothDevice();
+    public void start() {
+        Log.d(TAG, "start()");
+        connectedThread.start();
     }
 
-    /**
-     * Internal
-     * @return
-     */
-    protected Connection getActiveConnection(){
-        return mActiveConnection;
+    public String getDeviceAddress() {
+        Log.d(TAG, "getDeviceAddress");
+        return bluetoothDevice.getAddress();
+    }
+
+    protected BluetoothDevice getBluetoothDevice(){
+        return bluetoothDevice;
+    }
+
+    public void write(Message msg) throws IOException {
+        Log.d(TAG, "write");
+        connectedThread.write(msg.getBytes());
+    }
+
+
+    public long getConnectionID() {
+        return connectionID;
     }
 }
+

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Observable;
 import java.util.Set;
 
-import BluetoothCommunication.Connection;
+import BluetoothCommunication.BluetoothConnection;
 import BluetoothCommunication.Message;
 import fllog.Log;
 
@@ -29,7 +29,7 @@ public class BluetoothModel extends Observable {
     /**
      * Das HashSet wird von BluetoothAdapter.getBondedDevices() verwendet.
      */
-    private Set<Connection> connections = new HashSet<Connection>(Controller.MAX_NUMBER_OF_DEVICES);
+    private Set<BluetoothConnection> bluetoothConnections = new HashSet<BluetoothConnection>(Controller.MAX_NUMBER_OF_DEVICES);
 
     /**
      * Speichert die eingegangenen Nachrichten.
@@ -66,13 +66,13 @@ public class BluetoothModel extends Observable {
     }
 
     public int getNumberOfConnections() {
-        Log.d(TAG, "getNumberOfConnections: " + connections.size());
-        return connections.size();
+        Log.d(TAG, "getNumberOfConnections: " + bluetoothConnections.size());
+        return bluetoothConnections.size();
     }
 
-    public void addConnection(Connection connection) {
+    public void addConnection(BluetoothConnection bluetoothConnection) {
         Log.d(TAG, "addConnection");
-        connections.add(connection);
+        bluetoothConnections.add(bluetoothConnection);
         notifyObservers();
     }
 
@@ -85,11 +85,11 @@ public class BluetoothModel extends Observable {
     public boolean isDeviceAlreadyConnected(String deciveMac) {
         Log.d(TAG, "isDeviceAlreadyConnected: " + deciveMac + "...");
         //Kein Gerät verbunden -> Gerät darf sich verbinden.
-        if (connections.isEmpty()) {
+        if (bluetoothConnections.isEmpty()) {
             Log.d(TAG, "..device not connected");
             return false;
         }
-        for (Connection c : connections) {
+        for (BluetoothConnection c : bluetoothConnections) {
             if (c.getDeviceAddress().equals(deciveMac)) {
                 Log.d(TAG, "..device connected");
                 return true;
@@ -99,29 +99,29 @@ public class BluetoothModel extends Observable {
         return false;
     }
 
-    public Set<Connection> getConnections() {
-        Log.d(TAG, "getConnections");
-        return connections;
+    public Set<BluetoothConnection> getBluetoothConnections() {
+        Log.d(TAG, "getBluetoothConnections");
+        return bluetoothConnections;
     }
 
     /**
      * Entfernt die Verbindung mit der zugehörigen Connectin ID.
      * Die Funktion geht davon aus, das nur eine Verbindung pro Gerät besteht.
      *
-     * @param connectionID long Connection Id der geschlossenen Verbindung.
+     * @param connectionID long BluetoothConnection Id der geschlossenen Verbindung.
      * @return
      */
     public boolean removeConnection(long connectionID) {
         Log.d(TAG, "removeConnection");
-        if (connections.isEmpty()) {
+        if (bluetoothConnections.isEmpty()) {
             Log.d(TAG, "connection set is empty!");
             return true;
         }
         //find the connection with the thread id and update the observer.
-        for (Connection c : connections) {
+        for (BluetoothConnection c : bluetoothConnections) {
             if (c.getConnectionID() == connectionID) {
                 Log.d(TAG, "connectionID " + connectionID + " removed");
-                connections.remove(c);
+                bluetoothConnections.remove(c);
                 notifyObservers();
                 return true;
             }

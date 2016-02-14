@@ -12,12 +12,12 @@ import fllog.Log;
  * <p/>
  * Created by Jan Urbansky on 06.01.2016.
  */
-public class MessageStoreContainer {
+public final class MessageStoreContainer {
     private static final String TAG = "fhflMessageStoreCont";
     private Message message;
     private long timestamp;
 
-    public MessageStoreContainer(Message message, long timestamp) {
+    protected MessageStoreContainer(Message message, long timestamp) {
         Log.d(TAG, "MessageStoreContainer()");
         this.message = message;
         this.timestamp = timestamp;
