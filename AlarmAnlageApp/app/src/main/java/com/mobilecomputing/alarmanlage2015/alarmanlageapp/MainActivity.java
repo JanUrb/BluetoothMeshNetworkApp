@@ -29,6 +29,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 
+import BluetoothCommunication.BluetoothModel;
+import BluetoothCommunication.Controller;
 import fllog.Log;
 
 public class MainActivity extends Activity {

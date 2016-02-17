@@ -2,8 +2,6 @@ package BluetoothCommunication;
 
 import android.util.Log;
 
-import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Controller;
-
 /**
  * Created by Jan Urbansky on 02.01.2016.
  * <p/>

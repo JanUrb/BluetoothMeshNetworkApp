@@ -6,11 +6,6 @@ import android.bluetooth.BluetoothSocket;
 
 import java.io.IOException;
 
-
-import android.util.Log;
-
-import com.mobilecomputing.alarmanlage2015.alarmanlageapp.Controller;
-
 /**
  * Created by Jan Urbansky on 19.12.2015.
  * <p/>

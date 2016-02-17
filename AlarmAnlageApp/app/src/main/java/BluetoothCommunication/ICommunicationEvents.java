@@ -18,7 +18,7 @@ public interface ICommunicationEvents {
     /**
      * Triggers if a connection with a device is established.
      */
-    public void onConnectedEstablished(BluetoothConnection runningConnection);
+    public void onConnectedEstablished(BluetoothConnection activeConnection);
 
     /**
      * Triggers if the connection to a device is disconnected.

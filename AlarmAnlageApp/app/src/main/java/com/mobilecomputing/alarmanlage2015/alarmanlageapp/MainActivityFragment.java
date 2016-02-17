@@ -13,6 +13,8 @@ import java.util.Observable;
 import java.util.Observer;
 
 import BluetoothCommunication.BluetoothConnection;
+import BluetoothCommunication.BluetoothModel;
+import BluetoothCommunication.Controller;
 import BluetoothCommunication.Message;
 import fllog.Log;
 

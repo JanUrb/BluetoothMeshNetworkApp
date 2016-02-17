@@ -60,12 +60,16 @@ public class BluetoothCommunicator {
 
     }
 
+    public String getMyBtAddr(){
+        return "";
+    }
+
     public void sendToDevice(BluetoothDevice btDevice){
         sendToDevice(btDevice.getAddress());
     }
 
     public void sendToDevice(BluetoothConnection btConnection){
-        sendToDevice(btConnection.getDevice());
+        sendToDevice(btConnection.getBluetoothDevice());
     }
 
 
