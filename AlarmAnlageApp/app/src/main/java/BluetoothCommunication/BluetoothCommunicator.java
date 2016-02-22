@@ -1,5 +1,6 @@
 package BluetoothCommunication;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
 
 import java.util.List;
@@ -17,19 +18,32 @@ import java.util.List;
  */
 public class BluetoothCommunicator {
 
+    private Controller controller;
+    private BluetoothModel bt_model;
+    private ILogFragment logFragment;
+    private Activity mainActivity = null;
+
+
+    public BluetoothCommunicator(Activity mainActivity) {
+        controller = new Controller();
+        bt_model = new BluetoothModel();
+        this.mainActivity = mainActivity;
+
+    }
 
     /**
      * Enables Bluetooth and Discoverability.
+     * TODO: Im controller trennen
      */
     public void init(){
-
+        controller.init(mainActivity, bt_model);
     }
 
     /**
      * The search for connections starts.
      */
     public void start(){
-
+        controller.startBluetoothCycle();
     }
 
     public void stop(){

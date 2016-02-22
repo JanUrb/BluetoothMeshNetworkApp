@@ -21,7 +21,7 @@ import fllog.Log;
  * <p/>
  * Übernommen aus dem RFCOMM-Server Projekt und unserem Projekt angepasst.
  */
-public class Controller extends StateMachine {
+public final class Controller extends StateMachine {
 
     private static final String TAG = "fhflController";
     private Activity mActivity = null;
@@ -48,7 +48,7 @@ public class Controller extends StateMachine {
 
     BluetoothAdapter mBluetoothAdapter;
     // Hier (0x1101 => Serial Port Profile + Base_UUID)
-    public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+    protected static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     /**
      * Gibt die Maximale Anzahl der verbundenen Geräte an (7 laut Bt-Standard).
@@ -88,16 +88,20 @@ public class Controller extends StateMachine {
         messageStorage = new MessageStorage();
     }
 
-    public void init(Activity a, BluetoothModel bt_model) {
+    protected void init(Activity a, BluetoothModel bt_model) {
         Log.d(TAG, "init()");
 
         mActivity = a;
         this.bt_model = bt_model;
 
         // send message for start transition
-        sendSmMessage(SmMessage.CO_INIT.ordinal(), 0, 0, null);
+
     }
 
+
+    protected void startBluetoothCycle(){
+        sendSmMessage(SmMessage.CO_INIT.ordinal(), 0, 0, null);
+    }
     /**
      * Die Statemachine
      * <p/>

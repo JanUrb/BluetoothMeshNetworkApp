@@ -74,6 +74,7 @@ public class MainActivity extends Activity {
         controller.init(this, bt_model);
     }
 
+
     /**
      * Initialisiert den Broadcast Receiver und registriert ihn für
      * BluetoothDevice.ACTION_FOUND, BluetoothAdapter.ACTION_DISCOVERY_STARTED(für Tests) und

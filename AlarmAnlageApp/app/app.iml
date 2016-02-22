@@ -87,8 +87,8 @@
     <orderEntry type="library" exported="" scope="TEST" name="easymock-3.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="javassist-3.20.0-GA" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="objenesis-2.2" level="project" />
-    <orderEntry type="library" exported="" scope="TEST" name="powermock-api-support-1.6.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="powermock-api-easymock-1.6.4" level="project" />
+    <orderEntry type="library" exported="" scope="TEST" name="powermock-api-support-1.6.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="powermock-core-1.6.4" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-core-1.3" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="powermock-reflect-1.6.4" level="project" />
