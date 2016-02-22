@@ -48,9 +48,9 @@ public class MainActivity extends Activity {
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mAppController = new AppController();
-        mAppModel = new AppModel();
+        mBluetoothCommunicator = new BluetoothCommunicator(this);
+        mAppController = new AppController(mBluetoothCommunicator);
+        mAppModel = new AppModel(mBluetoothCommunicator);
 
 
         final MainActivityFragment mainFrag = new MainActivityFragment();
@@ -59,7 +59,7 @@ public class MainActivity extends Activity {
         getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFrag).
                 replace(R.id.log_fragment_container, Log.getFragment()).commit();
 
-        mBluetoothCommunicator = new BluetoothCommunicator(this);
+
         mBluetoothCommunicator.init();
 
         //Die Bluetoothverbindung wird mit dem Starten der App aufgebaut. Es wird also keine
@@ -84,11 +84,11 @@ public class MainActivity extends Activity {
         Log.d(TAG, "onActivityResult()");
         switch (requestCode) {
             case Controller.REQUEST_ENABLE_BT:
-                controller.bluetoothAdapterEnabled(); //es folgt discoverarbility
+                mAppController.bluetoothAdapterEnabled(); //es folgt discoverarbility
                 break;
 
             case Controller.REQUEST_ENABLE_DISCO:
-                controller.discoverabilityEnabled(); //es folgt read devices
+                mAppController.discoverabilityEnabled(); //es folgt read devices
                 break;
 
             default:

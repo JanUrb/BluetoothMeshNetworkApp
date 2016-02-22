@@ -112,8 +112,8 @@ public class MainActivityFragment extends Fragment implements Observer {
         Log.d(TAG, "update");
 
         //my_bt_addr
-        if (!mAppModel.getMyBT_ADDR().isEmpty()) {
-            my_bt_addr.setText(mAppModel.getMyBT_ADDR());
+        if (!mAppModel.getMyBTADDR().isEmpty()) {
+            my_bt_addr.setText(mAppModel.getMyBTADDR());
         }
 
         //received_message
@@ -126,12 +126,10 @@ public class MainActivityFragment extends Fragment implements Observer {
         //device_list
         if (mAppModel.getBluetoothConnections() != null) {
             StringBuilder str = new StringBuilder();
-            if (!mAppModel.getBluetoothConnections().isEmpty()) {
-                for (BluetoothConnection connection : mAppModel.getBluetoothConnections()) {
-                    str.append(connection.getDeviceAddress() + "\n");
-                }
-            } else {
-                str.append("No connected devices");
+
+            for (BluetoothConnection connectionAddress : mAppModel.getBluetoothConnections()) {
+                str.append(connectionAddress.getDeviceAddress() + "\n");
+
             }
             device_list.setText(str.toString());
         }
