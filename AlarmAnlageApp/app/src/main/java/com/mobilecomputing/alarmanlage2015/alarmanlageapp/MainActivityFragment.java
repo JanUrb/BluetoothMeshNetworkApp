@@ -24,8 +24,8 @@ import fllog.Log;
 public class MainActivityFragment extends Fragment implements Observer {
     private static final String TAG = "fhflMainActFragment";
 
-    private BluetoothModel bt_model;
-    private Controller controller;
+    private AppModel mAppModel;
+    private AppController controller;
 
 
     /**
@@ -77,7 +77,7 @@ public class MainActivityFragment extends Fragment implements Observer {
             public void onClick(View v) {
                 Log.d(TAG, "onClickListener");
                 String address = address_input.getText().toString();
-                controller.sendSmMessage(Controller.SmMessage.SEND_MESSAGE.ordinal(), 0, 0, address);
+                controller.sendMessage(address);
             }
         });
 // für debugging und vorführung. Nach langem klicken wird das Feld leer gemacht.
@@ -95,15 +95,15 @@ public class MainActivityFragment extends Fragment implements Observer {
     }
 
 
-    public void setController(Controller controller) {
+    public void setController(AppController controller) {
         Log.d(TAG, "setController");
         this.controller = controller;
     }
 
-    public void setBt_model(BluetoothModel bt_model) {
-        Log.d(TAG, "setBt_model");
-        this.bt_model = bt_model;
-        this.bt_model.addObserver(this);
+    public void setAppModel(AppModel appModel) {
+        Log.d(TAG, "setAppModel");
+        this.mAppModel = appModel;
+        this.mAppModel.addObserver(this);
     }
 
 
@@ -112,22 +112,22 @@ public class MainActivityFragment extends Fragment implements Observer {
         Log.d(TAG, "update");
 
         //my_bt_addr
-        if (!bt_model.getMyBT_ADDR().isEmpty()) {
-            my_bt_addr.setText(bt_model.getMyBT_ADDR());
+        if (!mAppModel.getMyBT_ADDR().isEmpty()) {
+            my_bt_addr.setText(mAppModel.getMyBT_ADDR());
         }
 
         //received_message
-        if (bt_model.getCurrentMessage() != null) {
-            Message currentMsg = bt_model.getCurrentMessage();
+        if (mAppModel.getCurrentMessage() != null) {
+            Message currentMsg = mAppModel.getCurrentMessage();
             String txt = "SRC: " + currentMsg.getMessageSourceMac();
             received_message.setText(txt);
         }
 
         //device_list
-        if (bt_model.getBluetoothConnections() != null) {
+        if (mAppModel.getBluetoothConnections() != null) {
             StringBuilder str = new StringBuilder();
-            if (!bt_model.getBluetoothConnections().isEmpty()) {
-                for (BluetoothConnection connection : bt_model.getBluetoothConnections()) {
+            if (!mAppModel.getBluetoothConnections().isEmpty()) {
+                for (BluetoothConnection connection : mAppModel.getBluetoothConnections()) {
                     str.append(connection.getDeviceAddress() + "\n");
                 }
             } else {

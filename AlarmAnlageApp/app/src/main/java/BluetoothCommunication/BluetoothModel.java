@@ -13,7 +13,7 @@ import fllog.Log;
 /**
  * Created by Jan Urbansky on 23.12.2015.
  */
-public class BluetoothModel extends Observable {
+public final class BluetoothModel extends Observable {
 
     private final static String TAG = "fhflBluetoothModel";
 
@@ -37,7 +37,7 @@ public class BluetoothModel extends Observable {
      */
     private Message currentMessage = null;
 
-    public BluetoothModel() {
+    protected BluetoothModel() {
         Log.d(TAG, "BluetoothModel()");
     }
 

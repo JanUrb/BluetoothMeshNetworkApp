@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,6 +30,7 @@ public final class Controller extends StateMachine {
     private Activity mActivity = null;
     private BluetoothModel bt_model;
     private MessageStorage messageStorage = null;
+    private BroadcastReceiver mBroadCastReceiver;
     /**
      * Gibt an, ob die max Anzahl der Geräte erreicht wurde. Wird in MAX_THREAD_NUMBER und in
      * START_NEW_CONNECTION_CYCLE gesetzt
@@ -83,7 +87,7 @@ public final class Controller extends StateMachine {
 
     public static SmMessage[] messageIndex = SmMessage.values();
 
-    public Controller() {
+    protected Controller() {
         Log.d(TAG, "Controller()");
         messageStorage = new MessageStorage();
     }
@@ -516,6 +520,73 @@ public final class Controller extends StateMachine {
     public interface OnControllerInteractionListener {
         public void onControllerReceived(String str);
     }
+
+
+
+    /**
+     * Initialisiert den Broadcast Receiver und registriert ihn für
+     * BluetoothDevice.ACTION_FOUND, BluetoothAdapter.ACTION_DISCOVERY_STARTED(für Tests) und
+     * BluetoothAdapter.ACTION_DISCOVERY_FINISHED
+     * <p/>
+     * Es darf pro Discovery Cycle nur mit einem Gerät eine Verbindung aufgebaut werden. Dazu wird
+     * die validDeviceFound Variable genutzt.
+     */
+    private void initBroadcastReceiver() {
+        Log.d(TAG, "initBroadcastReceiver");
+        mBroadCastReceiver = new BroadcastReceiver() {
+
+            private long startTime;
+            private boolean validDeviceFound = false;
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String action = intent.getAction();
+
+                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
+                    Log.d(TAG, "onReceive - Discovery Started");
+                    startTime = System.currentTimeMillis();
+                    validDeviceFound = false;
+
+                } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                    Log.d(TAG, "onReceive - device name: " + device.getName() + " Device ID: " + device.getAddress());
+                    //wenn die Grenze !validDeviceFound nicht eingebaut wird, können viele Threads vom
+                    //Controller gestartet werden. Dies führt zu unberechenbarem Verhalten.
+                    if (BluetoothModel.BANNED_DEVICE_ADDRESSES.contains(device.getAddress())) {
+                        Log.d(TAG, "(Ignored device) found banned device: " + device.getName() + "MAC: " + device.getAddress());
+                    } else if (!bt_model.isDeviceAlreadyConnected(device.getAddress()) && !validDeviceFound) {
+                        validDeviceFound = true;
+                        startClientThread(device);
+                    } else {
+                        Log.d(TAG, "onReceive - device already connected or cycle full: " + device.getAddress() + "\nDeviceFound: " + validDeviceFound);
+                    }
+                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
+                    Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
+                    Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
+                    //Wenn ein Gerät gefunden wurde übernimmt der ACTION_FOUND Zweig den Übergang in den nächsten State
+                    //Wenn kein Gerät gefunden wurde, wird ein ServerThread gestartet.
+                    if (!validDeviceFound) {
+                        Log.d(TAG, "onReceive - start Server Routine");
+                        startServerThread();
+                    }
+
+                }
+            }
+
+        };
+        IntentFilter actionFoundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
+        IntentFilter discoveryStartedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+        IntentFilter discoveryFinishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+
+        //der Receiver handelt die actions.
+        mActivity.registerReceiver(mBroadCastReceiver, actionFoundFilter);
+
+        mActivity.registerReceiver(mBroadCastReceiver, discoveryStartedFilter);
+
+        mActivity.registerReceiver(mBroadCastReceiver, discoveryFinishedFilter);
+    }
+
 
 }
 

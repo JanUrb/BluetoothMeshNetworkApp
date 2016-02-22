@@ -21,28 +21,24 @@ package com.mobilecomputing.alarmanlage2015.alarmanlageapp;
 
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 
-import BluetoothCommunication.BluetoothModel;
+import BluetoothCommunication.BluetoothCommunicator;
 import BluetoothCommunication.Controller;
 import fllog.Log;
 
 public class MainActivity extends Activity {
 
     private static final String TAG = "fhflAlarmMainActivity";
+    private BluetoothCommunicator mBluetoothCommunicator;
 
-    private Controller controller;
-    private BluetoothModel bt_model;
+    private AppController mAppController;
+    private AppModel mAppModel;
     /**
      * Empfängt die Intents von FIND_DEVICE
      */
-    private BroadcastReceiver mBroadCastReceiver;
+
     public static MainActivity instance = null; //?
 
 
@@ -53,91 +49,27 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mAppController = new AppController();
+        mAppModel = new AppModel();
 
-        bt_model = new BluetoothModel();
 
         final MainActivityFragment mainFrag = new MainActivityFragment();
-        mainFrag.setBt_model(bt_model);
+        mainFrag.setAppModel(mAppModel);
 
         getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFrag).
                 replace(R.id.log_fragment_container, Log.getFragment()).commit();
 
-        controller = new Controller();
+        mBluetoothCommunicator = new BluetoothCommunicator(this);
+        mBluetoothCommunicator.init();
 
         //Die Bluetoothverbindung wird mit dem Starten der App aufgebaut. Es wird also keine
         //Benachrichtigung durch die UI benötigt.
-        mainFrag.setController(controller);
+        mainFrag.setController(mAppController);
 
-
-        initBroadcastReceiver();
-
-        controller.init(this, bt_model);
     }
 
 
-    /**
-     * Initialisiert den Broadcast Receiver und registriert ihn für
-     * BluetoothDevice.ACTION_FOUND, BluetoothAdapter.ACTION_DISCOVERY_STARTED(für Tests) und
-     * BluetoothAdapter.ACTION_DISCOVERY_FINISHED
-     * <p/>
-     * Es darf pro Discovery Cycle nur mit einem Gerät eine Verbindung aufgebaut werden. Dazu wird
-     * die validDeviceFound Variable genutzt.
-     */
-    private void initBroadcastReceiver() {
-        Log.d(TAG, "initBroadcastReceiver");
-        mBroadCastReceiver = new BroadcastReceiver() {
 
-            private long startTime;
-            private boolean validDeviceFound = false;
-
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-                String action = intent.getAction();
-
-                if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action)) {
-                    Log.d(TAG, "onReceive - Discovery Started");
-                    startTime = System.currentTimeMillis();
-                    validDeviceFound = false;
-
-                } else if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                    BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                    Log.d(TAG, "onReceive - device name: " + device.getName() + " Device ID: " + device.getAddress());
-                    //wenn die Grenze !validDeviceFound nicht eingebaut wird, können viele Threads vom
-                    //Controller gestartet werden. Dies führt zu unberechenbarem Verhalten.
-                    if (BluetoothModel.BANNED_DEVICE_ADDRESSES.contains(device.getAddress())) {
-                        Log.d(TAG, "(Ignored device) found banned device: " + device.getName() + "MAC: " + device.getAddress());
-                    } else if (!bt_model.isDeviceAlreadyConnected(device.getAddress()) && !validDeviceFound) {
-                        validDeviceFound = true;
-                        controller.startClientThread(device);
-                    } else {
-                        Log.d(TAG, "onReceive - device already connected or cycle full: " + device.getAddress() + "\nDeviceFound: " + validDeviceFound);
-                    }
-                } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                    Log.d(TAG, "onReceive - no Device Found - Discovery Finished");
-                    Log.d(TAG, "onReceive - Discovery Duration: " + (System.currentTimeMillis() - startTime) + " ms");
-                    //Wenn ein Gerät gefunden wurde übernimmt der ACTION_FOUND Zweig den Übergang in den nächsten State
-                    //Wenn kein Gerät gefunden wurde, wird ein ServerThread gestartet.
-                    if (!validDeviceFound) {
-                        Log.d(TAG, "onReceive - start Server Routine");
-                        controller.startServerThread();
-                    }
-
-                }
-            }
-
-        };
-        IntentFilter actionFoundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
-        IntentFilter discoveryStartedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-        IntentFilter discoveryFinishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-
-        //der Receiver handelt die actions.
-        registerReceiver(mBroadCastReceiver, actionFoundFilter);
-
-        registerReceiver(mBroadCastReceiver, discoveryStartedFilter);
-
-        registerReceiver(mBroadCastReceiver, discoveryFinishedFilter);
-    }
 
 
     /**
