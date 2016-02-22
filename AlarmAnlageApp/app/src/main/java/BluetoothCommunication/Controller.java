@@ -97,7 +97,7 @@ public final class Controller extends StateMachine {
 
         mActivity = a;
         this.bt_model = bt_model;
-
+        initBroadcastReceiver();
         // send message for start transition
 
     }
